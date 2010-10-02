@@ -5,10 +5,10 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<title></title>
+<title>Dump</title>
 </head>
 <body>
-Kind一覧
+<div>Please select the kind(s) to get dump.</div>
 <form action="${f:url("start")}" method="POST">
 <ul>
 <c:forEach items="${list}" var="row">
@@ -18,7 +18,7 @@ Kind一覧
 </li>
 </c:forEach>
 </ul>
-<input type="submit" value="実行" />
+<input type="submit" value="execute" />
 </form>
 </body>
 </html>
