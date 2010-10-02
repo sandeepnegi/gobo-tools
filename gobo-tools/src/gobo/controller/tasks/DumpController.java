@@ -36,7 +36,7 @@ public class DumpController extends Controller {
 		final String cursor = asString("cursor");
 		final Integer rowNum = asInteger("rowNum");
 		final String token = asString("token");
-		System.out.println("Getting dump kind=" + kind + ":rowNum=" + rowNum);
+		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
 		// Datastoreからデータを取得
