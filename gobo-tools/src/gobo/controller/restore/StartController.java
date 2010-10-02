@@ -52,7 +52,7 @@ public class StartController extends Controller {
 					.param("controlId", Datastore.keyToString(controlId))
 					.param("ssKey", ssKey)
 					.param("wsTitle", wsTitles[i])
-					.param("rowNum", "1")
+					.param("rowNum", "2")
 					.method(Method.GET));
 			}
 			Datastore.commit(tx);

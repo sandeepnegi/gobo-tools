@@ -1,4 +1,4 @@
-package gobo.util;
+package gobo.service;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -38,13 +38,13 @@ import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.data.spreadsheet.Data.InsertionMode;
 import com.google.gdata.util.ServiceException;
 
-public class SpreadsheetUtil {
+public class GbSpreadsheetService {
 
 	private String authSubToken;
 	private SpreadsheetService ss;
 	private DocsService cs;
 
-	public SpreadsheetUtil(String authSubToken) {
+	public GbSpreadsheetService(String authSubToken) {
 		this.authSubToken = authSubToken;
 		ss = new SpreadsheetService("dstools");
 		ss.setAuthSubToken(this.authSubToken);
@@ -164,24 +164,25 @@ public class SpreadsheetUtil {
 		WorksheetFeed spreadsheetFeed = ss.query(worksheetQuery, WorksheetFeed.class);
 		WorksheetEntry workSheet = spreadsheetFeed.getEntries().get(0);
 		final int colCount = workSheet.getColCount();
-		final int rowCount = maxRows + 1;
+		final int rowCount = maxRows + 2;
 		String[][] data = new String[rowCount][colCount];
 
 		URL cellFeedUrl = workSheet.getCellFeedUrl();
 		CellQuery query = new CellQuery(cellFeedUrl);
 
-		// Title
+		// Title & Type
 		query.setMinimumRow(1);
-		query.setMaximumRow(1);
+		query.setMaximumRow(2);
 		CellFeed feed = ss.query(query, CellFeed.class);
 		for (CellEntry cell : feed.getEntries()) {
 			String shortId = cell.getId().substring(cell.getId().lastIndexOf('/') + 1);
-			int col = Integer.parseInt(shortId.substring(shortId.lastIndexOf('C') + 1));
 			// System.out.println(shortId + ":" + cell.getCell().getValue());
-			data[0][col - 1] = cell.getCell().getValue();
+			int row = Integer.parseInt(shortId.substring(1, shortId.lastIndexOf('C')));
+			int col = Integer.parseInt(shortId.substring(shortId.lastIndexOf('C') + 1));
+			data[row - 1][col - 1] = cell.getCell().getValue();
 		}
 
-		// Data (start from line no.2)
+		// Data (start from line no.3)
 		query.setMinimumRow(startIndex);
 		final int maxRowCount = workSheet.getRowCount();
 		final int nextMax = startIndex + maxRows - 1;
@@ -197,7 +198,7 @@ public class SpreadsheetUtil {
 			System.out.println(shortId + ":" + cell.getCell().getValue());
 			int row = Integer.parseInt(shortId.substring(1, shortId.lastIndexOf('C')));
 			int col = Integer.parseInt(shortId.substring(shortId.lastIndexOf('C') + 1));
-			data[row - startIndex + 1][col - 1] = cell.getCell().getValue();
+			data[row - startIndex + 2][col - 1] = cell.getCell().getValue();
 		}
 		return data;
 	}
@@ -232,7 +233,7 @@ public class SpreadsheetUtil {
 		final String ssKey = spreadsheetEntry.getKey();
 
 		// Get Kind and Property Info
-		Map<String, Map<String, Object>> kindInfos = DatastoreUtil.getKindInfos();
+		Map<String, Map<String, Object>> kindInfos = GbDatastoreService.getKindInfos();
 		String kind = kinds.get(0);
 		Map<String, Object> props = kindInfos.get(kind);
 
@@ -288,7 +289,7 @@ public class SpreadsheetUtil {
 		tableData.setNumberOfRows(0);
 		tableData.setStartIndex(2);
 		tableData.setInsertionMode(InsertionMode.INSERT);
-		
+
 		// Create a title row
 		tableData.addColumn(new Column("A", Entity.KEY_RESERVED_PROPERTY));
 		Object[] keys = columns.keySet().toArray();
@@ -332,7 +333,7 @@ public class SpreadsheetUtil {
 			RecordEntry newEntry = new RecordEntry();
 			for (String key : row.keySet()) {
 				if (row.get(key) != null) {
-					newEntry.addField(new Field(null, key, (String) row.get(key)));
+					newEntry.addField(new Field(null, key, row.get(key).toString()));
 				}
 			}
 			ss.insert(recordFeedUrl, newEntry);

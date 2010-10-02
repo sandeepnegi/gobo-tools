@@ -1,4 +1,4 @@
-package gobo.util;
+package gobo.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.slim3.util.AppEngineUtil;
+import org.slim3.util.ClassUtil;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -14,11 +15,12 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.users.User;
 import com.google.apphosting.api.DatastorePb.Schema;
 import com.google.storage.onestore.v3.OnestoreEntity.EntityProto;
 import com.google.storage.onestore.v3.OnestoreEntity.Property;
 
-public class DatastoreUtil {
+public class GbDatastoreService {
 
 	public static List<String> getKinds() {
 
@@ -85,7 +87,7 @@ public class DatastoreUtil {
 	public void restoreData(String wsTitle, String[][] data) {
 
 		List<Entity> list = new ArrayList<Entity>();
-		for (int row = 1; row < data.length; row++) {
+		for (int row = 2; row < data.length; row++) {
 
 			// parsing Key
 			String keyValue = data[row][0];
@@ -111,8 +113,12 @@ public class DatastoreUtil {
 
 			// Properties
 			for (int col = 1; col < data[row].length; col++) {
-				String value = data[row][col];
-				entity.setProperty(data[0][col], value);
+				final String propName = data[0][col];
+				final String propType = data[1][col];
+				final String value = data[row][col];
+				//Object typedValue = asValueType(propType, value);
+				//entity.setProperty(propName, typedValue);
+				entity.setProperty(propName, value);
 			}
 			System.out.println(entity);
 			if (entity.getProperties().size() <= 1) {
@@ -125,4 +131,36 @@ public class DatastoreUtil {
 		return;
 	}
 
+	Map<String, Class<?>> map = new HashMap<String, Class<?>>();
+	{
+		map.put("stringValue", String.class);
+		map.put("int64Value", Long.class);
+		map.put("doubleValue", Double.class);
+		map.put("booleanValue", Boolean.class);
+		map.put("UserValue", User.class);
+		map.put("ReferenceValue", Key.class);
+	}
+
+	Object asValueType(String type, String value) {
+
+		Class<?> clazz = map.get(type);
+		Object instance = ClassUtil.newInstance(clazz);
+		Object dataType = null;
+		if (instance instanceof String) {
+			dataType = value;
+		} else if (instance instanceof Long) {
+			dataType = new Long(value);
+		} else if (instance instanceof Double) {
+			dataType = new Double(value);
+		} else if (instance instanceof Boolean) {
+			dataType = new Boolean(value);
+		} else if (instance instanceof User) {
+			// dataType = new User(value);
+			throw new RuntimeException("User type is not supported. value=" + value);
+		} else if (instance instanceof Key) {
+			// dataType = new User(value);
+			throw new RuntimeException("ReferenceValue type is not supported." + value);
+		}
+		return dataType;
+	}
 }

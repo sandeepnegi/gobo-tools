@@ -1,7 +1,7 @@
 package gobo.controller.tasks;
 
 import gobo.model.Control;
-import gobo.util.SpreadsheetUtil;
+import gobo.service.GbSpreadsheetService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,7 +67,7 @@ public class DumpController extends Controller {
 		}
 
 		// Add to Spreadsheet.
-		SpreadsheetUtil service = new SpreadsheetUtil(token);
+		GbSpreadsheetService service = new GbSpreadsheetService(token);
 		service.dumpData(ssKey, kind, tableId, list);
 
 		// Update the control table.
