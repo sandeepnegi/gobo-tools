@@ -1,45 +1,16 @@
 @CHARSET "utf-8";
 
-body { background-color: #EEEEEE; }
-
-h1 { 
-	height: 33px;
-	font-size: x-large;
-	font-family: "Times New Roman", Times, serif;
+html, body {
+	color:#ccc;
 }
-
-ul li { list-style: square; }
-a:hover { background-color: white; }
-
-input.err { background-color: orange; }
-
-#header{
- width:760px;
- background-color: orange;
+h1 {
+	font-size:25px;
+	margin-top:10px;
 }
-
-#menu{
- width:160px;
- height:400px;
- text-align:left;
- vertical-align: top;
- float:left;
- background-color: aqua;
+h2 {
+	font-size:20px;
+	margin:0 0 30px;
 }
-
-#body{
- width:600px;
- height:400px;
- float:left;
- background-color: white;
+img {
+	border:0;
 }
-
-#footer{
- width:760px;
- text-align:left;
- background-color: black;
- color: white;
- clear: left;
-}
-
-
