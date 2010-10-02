@@ -39,7 +39,7 @@ public class DumpController extends Controller {
 		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
-		// Datastoreからデータを取得
+		// Get data from datastore.
 		EntityQuery query = Datastore.query(kind);
 		if (cursor != null) {
 			query = query.encodedStartCursor(cursor);
@@ -47,14 +47,14 @@ public class DumpController extends Controller {
 		QueryResultList<Entity> data = query.limit(RANGE).asQueryResultList();
 
 		if ((data == null) || (data.size() == 0)) {
-			// チェーンの最終タスクを呼んで終了
+			// Call the last chain.
 			queue.add(TaskOptions.Builder.url("/tasks/dumpEnd").param(
 				"controlId",
 				Datastore.keyToString(controlId)).param("kind", kind).method(Method.GET));
 			return null;
 		}
 
-		// 詰め替え
+		// Repackage
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		for (Entity row : data) {
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -66,17 +66,17 @@ public class DumpController extends Controller {
 			list.add(map);
 		}
 
-		// Spreadsheetに追記
+		// Add to Spreadsheet
 		SpreadsheetUtil service = new SpreadsheetUtil(token);
 		service.addTableRow(ssKey, kind, tableId, list);
 
-		// コントロールテーブルを更新
+		// Update log
 		Key childKey = Datastore.createKey(controlId, Control.class, kind);
 		Control control = Datastore.get(Control.class, childKey);
 		control.setCount(rowNum);
 		Datastore.put(control);
 
-		// タスクチェーンを継続
+		// Call next chain
 		final String nextRuwNum = String.valueOf(rowNum + RANGE);
 		queue.add(TaskOptions.Builder
 			.url("/tasks/dump")
