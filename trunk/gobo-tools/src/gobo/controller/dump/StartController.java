@@ -1,7 +1,7 @@
 package gobo.controller.dump;
 
 import gobo.model.Control;
-import gobo.util.SpreadsheetUtil;
+import gobo.service.GbSpreadsheetService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public class StartController extends Controller {
 		final String token = sessionScope("token");
 
 		// Craete new spreadsheet
-		SpreadsheetUtil su = new SpreadsheetUtil(token);
+		GbSpreadsheetService su = new GbSpreadsheetService(token);
 		final String ssKey = su.createSpreadsheet(Arrays.asList(kinds));
 		System.out.println("ssKey=" + ssKey);
 

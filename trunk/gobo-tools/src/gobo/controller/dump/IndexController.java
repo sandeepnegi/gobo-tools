@@ -1,6 +1,6 @@
 package gobo.controller.dump;
 
-import gobo.util.DatastoreUtil;
+import gobo.service.GbDatastoreService;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class IndexController extends Controller {
 	@Override
 	protected Navigation run() throws Exception {
 		
-		List<String> kinds = DatastoreUtil.getKinds();		
+		List<String> kinds = GbDatastoreService.getKinds();		
 		requestScope("list", kinds);
 		return forward("index.jsp");
 	}

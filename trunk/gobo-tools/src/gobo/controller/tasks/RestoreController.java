@@ -1,8 +1,8 @@
 package gobo.controller.tasks;
 
 import gobo.model.Control;
-import gobo.util.DatastoreUtil;
-import gobo.util.SpreadsheetUtil;
+import gobo.service.GbDatastoreService;
+import gobo.service.GbSpreadsheetService;
 
 import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
@@ -30,7 +30,7 @@ public class RestoreController extends Controller {
 		Queue queue = QueueFactory.getDefaultQueue();
 
 		// Spreadsheetからデータを取得
-		SpreadsheetUtil service = new SpreadsheetUtil(token);
+		GbSpreadsheetService service = new GbSpreadsheetService(token);
 		String[][] data = service.getData(ssKey, wsTitle, rowNum + 1, RANGE);
 		if (data == null) {
 			// チェーンの最終タスクを呼んで終了
@@ -41,7 +41,7 @@ public class RestoreController extends Controller {
 		}
 
 		// Restoring to Datastore.
-		DatastoreUtil datastoreUtil = new DatastoreUtil();
+		GbDatastoreService datastoreUtil = new GbDatastoreService();
 		datastoreUtil.restoreData(wsTitle, data);
 		
 		// コントロールテーブルを更新

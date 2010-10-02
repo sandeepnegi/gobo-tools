@@ -1,6 +1,6 @@
 package gobo.controller.restore;
 
-import gobo.util.SpreadsheetUtil;
+import gobo.service.GbSpreadsheetService;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class SheetController extends Controller {
 
 		final String ssKey = asString("ssKey");
 		
-		SpreadsheetUtil service = new SpreadsheetUtil((String) sessionScope("token"));
+		GbSpreadsheetService service = new GbSpreadsheetService((String) sessionScope("token"));
 		List<Map<String, String>> list = service.getAllWorkSheets(ssKey);
 		requestScope("list", list);
 
