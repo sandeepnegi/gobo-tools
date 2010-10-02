@@ -11,6 +11,8 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.apphosting.api.DatastorePb.Schema;
 import com.google.storage.onestore.v3.OnestoreEntity.EntityProto;
@@ -64,4 +66,53 @@ public class DatastoreUtil {
 		}
 		return kindInfos;
 	}
+
+	/**
+	 * 
+	 * @param wsTitle
+	 * @param data
+	 */
+	public void restoreData(String wsTitle, String[][] data) {
+
+		List<Entity> list = new ArrayList<Entity>();
+		for (int row = 1; row < data.length; row++) {
+
+			// parsing Key
+			String keyValue = data[row][0];
+			Entity entity = null;
+			if ((keyValue == null) || (keyValue.length() == 0)) {
+				entity = new Entity(wsTitle);
+			} else {
+				String[] keypaths = keyValue.split("/");
+				Key key = null;
+				for (String path : keypaths) {
+					String[] split = path.split("[()]");
+					String kind = split[0];
+					String keyVal = split[1];
+					if (keyVal.startsWith("\"")) {
+						keyVal = keyVal.replaceAll("\"", "");
+						key = KeyFactory.createKey(key, kind, keyVal);
+					} else {
+						key = KeyFactory.createKey(key, kind, Integer.parseInt(keyVal));
+					}
+				}
+				entity = new Entity(key);
+			}
+
+			// Properties
+			for (int col = 1; col < data[row].length; col++) {
+				String value = data[row][col];
+				entity.setProperty(data[0][col], value);
+			}
+			System.out.println(entity);
+			if (entity.getProperties().size() <= 1) {
+				break;
+			}
+			list.add(entity);
+		}
+		DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
+		datastoreService.put(list);
+		return;
+	}
+
 }

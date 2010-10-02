@@ -138,9 +138,24 @@ public class SpreadsheetUtil {
 		return list;
 	}
 
+	/**
+	 * get data from spreadsheet
+	 * @param ssKey
+	 * @param kind
+	 * @param startIndex
+	 * @param maxRows
+	 * @return
+	 * @throws IOException
+	 * @throws ServiceException
+	 */
 	public String[][] getData(String ssKey, String kind, Integer startIndex, Integer maxRows)
 			throws IOException, ServiceException {
 
+		/*
+		 * This code doesn't use list-base feed but cell-base feed.
+		 * because The columnNames are case-insensitive in list-base feed.
+		 */
+		
 		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
 		WorksheetQuery worksheetQuery =
 			new WorksheetQuery(urlFactory.getWorksheetFeedUrl(ssKey, "private", "values"));

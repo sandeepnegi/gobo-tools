@@ -9,6 +9,6 @@
 </head>
 <body>
 dumpを開始しました。<br />
-<a href="/menu.html">戻る</a>
+<a href="${f:url("/")}">戻る</a>
 </body>
 </html>
