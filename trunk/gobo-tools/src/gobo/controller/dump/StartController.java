@@ -27,17 +27,16 @@ public class StartController extends Controller {
 		final String[] kinds = request.getParameterValues("kindArray");
 		final String token = sessionScope("token");
 
-		// dump先のspreadsheetを作成
+		// Craete new spreadsheet
 		SpreadsheetUtil su = new SpreadsheetUtil(token);
 		final String ssKey = su.createSpreadsheet(Arrays.asList(kinds));
 		System.out.println("ssKey=" + ssKey);
 
-		// コントロールテーブルを用意
 		Transaction tx = null;
 		try {
 			tx = Datastore.beginTransaction();
 
-			// コントロールテーブルを準備
+			// Prepare control table.
 			Key controlId = Datastore.allocateId("dump");
 			List<Control> list = new ArrayList<Control>();
 			for (int i = 0; i < kinds.length; i++) {
@@ -49,7 +48,7 @@ public class StartController extends Controller {
 			}
 			Datastore.put(tx, list);
 
-			// タスクチェーンをKindごとにパラレルで起動
+			// Call the "task chain" for each kind
 			for (int i = 0; i < kinds.length; i++) {
 				Queue queue = QueueFactory.getDefaultQueue();
 				queue.add(tx, TaskOptions.Builder

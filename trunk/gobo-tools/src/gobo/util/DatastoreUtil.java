@@ -40,10 +40,16 @@ public class DatastoreUtil {
 		return kinds;
 	}
 
+	/**
+	 * Get kind and property info.
+	 * 
+	 * @return
+	 */
 	public static Map<String, Map<String, Object>> getKindInfos() {
 
 		Map<String, Map<String, Object>> kindInfos = new HashMap<String, Map<String, Object>>();
 		if (AppEngineUtil.isProduction()) {
+
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			List<Entity> list =
 				datastore.prepare(new Query("__Stat_PropertyType_PropertyName_Kind__")).asList(
@@ -51,17 +57,21 @@ public class DatastoreUtil {
 			for (Entity kind : list) {
 				kindInfos.put((String) kind.getProperty("kind_name"), kind.getProperties());
 			}
+
 		} else {
+
 			Schema schema = org.slim3.datastore.DatastoreUtil.getSchema();
 			List<EntityProto> entityProtoList = schema.kinds();
 			for (EntityProto entityProto : entityProtoList) {
 				Map<String, Object> props = new HashMap<String, Object>();
 				for (Property property : entityProto.propertys()) {
-					props.put(property.getName(), property.getValue().toString());
+					final String name = property.getName();
+					final String type = property.getValue().toString().split(":")[0];
+					props.put(name, type);
 				}
-				kindInfos.put(
-					org.slim3.datastore.DatastoreUtil.getKind(entityProto.getKey()),
-					props);
+				final String kindName =
+					org.slim3.datastore.DatastoreUtil.getKind(entityProto.getKey());
+				kindInfos.put(kindName, props);
 			}
 		}
 		return kindInfos;

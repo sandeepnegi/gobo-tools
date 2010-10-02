@@ -140,6 +140,7 @@ public class SpreadsheetUtil {
 
 	/**
 	 * get data from spreadsheet
+	 * 
 	 * @param ssKey
 	 * @param kind
 	 * @param startIndex
@@ -152,10 +153,10 @@ public class SpreadsheetUtil {
 			throws IOException, ServiceException {
 
 		/*
-		 * This code doesn't use list-base feed but cell-base feed.
-		 * because The columnNames are case-insensitive in list-base feed.
+		 * This code doesn't use list-base feed but cell-base feed. because The
+		 * columnNames are case-insensitive in list-base feed.
 		 */
-		
+
 		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
 		WorksheetQuery worksheetQuery =
 			new WorksheetQuery(urlFactory.getWorksheetFeedUrl(ssKey, "private", "values"));
@@ -212,7 +213,7 @@ public class SpreadsheetUtil {
 	public String createSpreadsheet(List<String> kinds) throws MalformedURLException, IOException,
 			ServiceException {
 
-		// "docs".SpreadsheetEntryを作成
+		// Create "docs".SpreadsheetEntry
 		final String appId = ApiProxy.getCurrentEnvironment().getAppId();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		final String fileName = appId + "_" + sdf.format(new Date());
@@ -221,7 +222,7 @@ public class SpreadsheetUtil {
 		entry.setTitle(new PlainTextConstruct(fileName));
 		cs.insert(new URL("https://docs.google.com/feeds/default/private/full/"), entry);
 
-		// "spreadsheet".SpreadsheetEntryで再取得
+		// Re-get in "spreadsheet".SpreadsheetEntry
 		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
 		SpreadsheetQuery spreadsheetQuery =
 			new SpreadsheetQuery(urlFactory.getSpreadsheetsFeedUrl());
@@ -264,6 +265,7 @@ public class SpreadsheetUtil {
 	}
 
 	/**
+	 * Create table(table-based feed)
 	 * 
 	 * @param ssKey
 	 * @param kind
@@ -286,19 +288,33 @@ public class SpreadsheetUtil {
 		tableData.setNumberOfRows(0);
 		tableData.setStartIndex(2);
 		tableData.setInsertionMode(InsertionMode.INSERT);
-
+		
+		// Create a title row
 		tableData.addColumn(new Column("A", Entity.KEY_RESERVED_PROPERTY));
 		Object[] keys = columns.keySet().toArray();
 		for (int i = 0; i < keys.length; i++) {
 			String index = number2columnName(i + 1);
-			Object value = keys[i];
-			tableData.addColumn(new Column(index, value.toString()));
+			String columnName = (String) keys[i];
+			tableData.addColumn(new Column(index, columnName));
 		}
 		tableEntry.setData(tableData);
-		ss.insert(tableFeedUrl, tableEntry);
+		TableEntry inserted = ss.insert(tableFeedUrl, tableEntry);
+
+		// Add a "type" row
+		String[] split = inserted.getId().split("/");
+		final String tableId = split[split.length - 1];
+		URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
+		RecordEntry newEntry = new RecordEntry();
+		for (int i = 0; i < keys.length; i++) {
+			String columnName = (String) keys[i];
+			String type = (String) columns.get(columnName);
+			newEntry.addField(new Field(null, columnName, type));
+		}
+		ss.insert(recordFeedUrl, newEntry);
 	}
 
 	/**
+	 * Add dump data to spreadsheet
 	 * 
 	 * @param ssKey
 	 * @param tableId
@@ -306,16 +322,14 @@ public class SpreadsheetUtil {
 	 * @throws IOException
 	 * @throws ServiceException
 	 */
-	public void addTableRow(String ssKey, String kind, String tableId,
-			List<Map<String, Object>> list) throws IOException, ServiceException {
+	public void dumpData(String ssKey, String kind, String tableId, List<Map<String, Object>> list)
+			throws IOException, ServiceException {
 
 		// Adding new rows to table
 		FeedURLFactory factory = FeedURLFactory.getDefault();
 		URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
 		for (Map<String, Object> row : list) {
 			RecordEntry newEntry = new RecordEntry();
-			newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, (String) row
-				.get(Entity.KEY_RESERVED_PROPERTY)));
 			for (String key : row.keySet()) {
 				if (row.get(key) != null) {
 					newEntry.addField(new Field(null, key, (String) row.get(key)));

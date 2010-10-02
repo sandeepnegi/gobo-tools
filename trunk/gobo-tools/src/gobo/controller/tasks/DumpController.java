@@ -54,29 +54,29 @@ public class DumpController extends Controller {
 			return null;
 		}
 
-		// Repackage
+		// Repackage.
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-		for (Entity row : data) {
+		for (Entity entity : data) {
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put(Entity.KEY_RESERVED_PROPERTY, row.getKey().toString());
-			Set<String> keySet = row.getProperties().keySet();
-			for (String key : keySet) {
-				map.put(key, row.getProperty(key));
+			map.put(Entity.KEY_RESERVED_PROPERTY, entity.getKey().toString());
+			Set<String> propNames = entity.getProperties().keySet();
+			for (String propName : propNames) {
+				map.put(propName, entity.getProperty(propName));
 			}
 			list.add(map);
 		}
 
-		// Add to Spreadsheet
+		// Add to Spreadsheet.
 		SpreadsheetUtil service = new SpreadsheetUtil(token);
-		service.addTableRow(ssKey, kind, tableId, list);
+		service.dumpData(ssKey, kind, tableId, list);
 
-		// Update log
+		// Update the control table.
 		Key childKey = Datastore.createKey(controlId, Control.class, kind);
 		Control control = Datastore.get(Control.class, childKey);
 		control.setCount(rowNum);
 		Datastore.put(control);
 
-		// Call next chain
+		// Call the next chain.
 		final String nextRuwNum = String.valueOf(rowNum + RANGE);
 		queue.add(TaskOptions.Builder
 			.url("/tasks/dump")
