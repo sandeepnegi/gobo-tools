@@ -89,17 +89,17 @@ public class SpreadsheetUtil {
 			ServiceException {
 
 		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
-		SpreadsheetQuery spreadsheetQuery =
-			new SpreadsheetQuery(urlFactory.getWorksheetFeedUrl(ssKey, "private", "values"));
-		SpreadsheetFeed spreadsheetFeed = ss.query(spreadsheetQuery, SpreadsheetFeed.class);
-		List<SpreadsheetEntry> workSheets = spreadsheetFeed.getEntries();
+		WorksheetQuery worksheetQuery =
+			new WorksheetQuery(urlFactory.getWorksheetFeedUrl(ssKey, "private", "values"));
+		WorksheetFeed worksheetFeed = ss.query(worksheetQuery, WorksheetFeed.class);
+		List<WorksheetEntry> entries = worksheetFeed.getEntries();
 
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-		for (SpreadsheetEntry workSheet : workSheets) {
+		for (WorksheetEntry workSheet : entries) {
 			Map<String, String> row = new HashMap<String, String>();
-			row.put("wsID", workSheet.getKey());
+			// row.put("wsID", workSheet.getId());
 			row.put("wsTitle", workSheet.getTitle().getPlainText());
-			row.put("rowCount", String.valueOf(workSheet.getWorksheets().size()));
+			row.put("rowCount", String.valueOf(workSheet.getRowCount()));
 			list.add(row);
 		}
 		return list;
@@ -187,32 +187,6 @@ public class SpreadsheetUtil {
 	}
 
 	/**
-	 * worksheetID => worksheetTitleのマップを作成
-	 * 
-	 * @param ssKey
-	 * @param wsIDs
-	 * @return
-	 * @throws IOException
-	 * @throws ServiceException
-	 */
-	public Map<String, String> worksheetID2Title(String ssKey, String[] wsIDs) throws IOException,
-			ServiceException {
-
-		List<Map<String, String>> list = getAllWorkSheets(ssKey);
-		Map<String, String> result = new HashMap<String, String>();
-		for (Map<String, String> row : list) {
-			final String _wsID = row.get("wsID");
-			for (int i = 0; i < wsIDs.length; i++) {
-				if (_wsID.equals(wsIDs[i])) {
-					result.put(_wsID, row.get("wsTitle"));
-					continue;
-				}
-			}
-		}
-		return result;
-	}
-
-	/**
 	 * 
 	 * @param kinds
 	 * @return
@@ -232,7 +206,7 @@ public class SpreadsheetUtil {
 		entry.setTitle(new PlainTextConstruct(fileName));
 		cs.insert(new URL("https://docs.google.com/feeds/default/private/full/"), entry);
 
-		// ファイル名から"spreadsheet".SpreadsheetEntryを再取得
+		// "spreadsheet".SpreadsheetEntryで再取得
 		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
 		SpreadsheetQuery spreadsheetQuery =
 			new SpreadsheetQuery(urlFactory.getSpreadsheetsFeedUrl());

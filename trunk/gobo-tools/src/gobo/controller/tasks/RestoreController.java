@@ -20,7 +20,6 @@ import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
-
 public class RestoreController extends Controller {
 
 	final Integer RANGE = 5;
@@ -30,7 +29,6 @@ public class RestoreController extends Controller {
 
 		final Key controlId = asKey("controlId");
 		final String ssKey = asString("ssKey");
-		final String wsID = asString("wsID");
 		final String wsTitle = asString("wsTitle");
 		final Integer rowNum = asInteger("rowNum");
 		final String token = asString("token");
@@ -44,7 +42,7 @@ public class RestoreController extends Controller {
 			// チェーンの最終タスクを呼んで終了
 			queue.add(TaskOptions.Builder.url("/tasks/restoreEnd").param(
 				"controlId",
-				Datastore.keyToString(controlId)).param("wsID", wsID).method(Method.GET));
+				Datastore.keyToString(controlId)).param("wsTitle", wsTitle).method(Method.GET));
 			return null;
 		}
 
@@ -86,18 +84,21 @@ public class RestoreController extends Controller {
 		datastoreService.put(list);
 
 		// コントロールテーブルを更新
-		Key childKey = Datastore.createKey(controlId, Control.class, wsID);
+		Key childKey = Datastore.createKey(controlId, Control.class, wsTitle);
 		Control control = Datastore.get(Control.class, childKey);
 		control.setCount(rowNum);
 		Datastore.put(control);
 
 		// タスクチェーンを継続
 		final String nextRuwNum = String.valueOf(rowNum + RANGE);
-		queue.add(TaskOptions.Builder.url("/tasks/restore").param("token", token).param(
-			"controlId",
-			Datastore.keyToString(controlId)).param("ssKey", ssKey).param("wsID", wsID).param(
-			"wsTitle",
-			wsTitle).param("rowNum", nextRuwNum).method(Method.GET));
+		queue.add(TaskOptions.Builder
+			.url("/tasks/restore")
+			.param("token", token)
+			.param("controlId", Datastore.keyToString(controlId))
+			.param("ssKey", ssKey)
+			.param("wsTitle", wsTitle)
+			.param("rowNum", nextRuwNum)
+			.method(Method.GET));
 
 		return null;
 	}

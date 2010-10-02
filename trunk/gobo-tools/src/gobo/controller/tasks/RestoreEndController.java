@@ -17,16 +17,16 @@ public class RestoreEndController extends Controller {
 	protected Navigation run() throws Exception {
 
 		final Key controlId = asKey("controlId");
-		final String wsID = asString("wsID");
+		final String wsTitle = asString("wsTitle");
 
 		// コントロールテーブルから該当ワークシートの行を削除
-		Key childKey = Datastore.createKey(controlId, Control.class, wsID);
+		Key childKey = Datastore.createKey(controlId, Control.class, wsTitle);
 		Datastore.delete(childKey);
 
 		List<Control> list = Datastore.query(Control.class, controlId).asList();
 		if ((list == null) || (list.size() == 0)) {
 			// TODO:mail
-			System.out.println("終了:" + wsID);
+			System.out.println("終了:" + wsTitle);
 		}
 
 		return null;

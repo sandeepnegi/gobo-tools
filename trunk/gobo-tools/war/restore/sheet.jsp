@@ -14,9 +14,8 @@
 <ul>
 <c:forEach items="${list}" var="row">
 <li>
-  <input type="checkbox" name="wsIDArray" value="${row.wsID}" id="title_${row.wsID}" />
-  <label for="title_${row.wsID}">${row.wsTitle}:${row.rowCount}</label>
-  <a href="${f:url("tasks/restore")}?token=${sessionScope.token}&ssKey=${ssKey}&wsID=${row.wsID}&rowNum=0" target="_blank">test</a>
+  <input type="checkbox" name="wsTitleArray" value="${row.wsTitle}" id="title_${row.wsTitle}" />
+  <label for="title_${row.wsTitle}">${row.wsTitle}:${row.rowCount}</label>
 </li>
 </c:forEach>
 </ul>
