@@ -1,20 +1,14 @@
 package gobo.controller.tasks;
 
 import gobo.model.Control;
+import gobo.util.DatastoreUtil;
 import gobo.util.SpreadsheetUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
 import org.slim3.datastore.Datastore;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
@@ -47,42 +41,9 @@ public class RestoreController extends Controller {
 		}
 
 		// Restoring to Datastore.
-		List<Entity> list = new ArrayList<Entity>();
-		for (int row = 1; row < data.length; row++) {
-
-			// parsing Key
-			String keyValue = data[row][0];
-			Entity entity = null;
-			if ((keyValue == null) || (keyValue.length() == 0)) {
-				entity = new Entity(wsTitle);
-			} else {
-				String[] keypaths = keyValue.split("/");
-				Key key = null;
-				for (String path : keypaths) {
-					String[] split = path.split("[()]");
-					String kind = split[0];
-					String keyVal = split[1];
-					if (keyVal.startsWith("\"")) {
-						keyVal = keyVal.replaceAll("\"", "");
-						key = KeyFactory.createKey(key, kind, keyVal);
-					} else {
-						key = KeyFactory.createKey(key, kind, Integer.parseInt(keyVal));
-					}
-				}
-				entity = new Entity(key);
-			}
-
-			// Properties
-			for (int col = 1; col < data[row].length; col++) {
-				String value = data[row][col];
-				entity.setProperty(data[0][col], value);
-			}
-			System.out.println(entity);
-			list.add(entity);
-		}
-		DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
-		datastoreService.put(list);
-
+		DatastoreUtil datastoreUtil = new DatastoreUtil();
+		datastoreUtil.restoreData(wsTitle, data);
+		
 		// コントロールテーブルを更新
 		Key childKey = Datastore.createKey(controlId, Control.class, wsTitle);
 		Control control = Datastore.get(Control.class, childKey);
