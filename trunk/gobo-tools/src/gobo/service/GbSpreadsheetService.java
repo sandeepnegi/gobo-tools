@@ -10,7 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.appengine.api.datastore.Category;
+import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PhoneNumber;
+import com.google.appengine.api.datastore.PostalAddress;
+import com.google.appengine.api.datastore.Rating;
 import com.google.apphosting.api.ApiProxy;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.client.spreadsheet.CellQuery;
@@ -333,7 +338,10 @@ public class GbSpreadsheetService {
 			RecordEntry newEntry = new RecordEntry();
 			for (String key : row.keySet()) {
 				if (row.get(key) != null) {
-					newEntry.addField(new Field(null, key, row.get(key).toString()));
+					Object val = row.get(key);
+					String value = asStringValue(val);
+					newEntry.addField(new Field(null, key, value));
+					//newEntry.addField(new Field(null, key, row.get(key).toString()));
 				}
 			}
 			ss.insert(recordFeedUrl, newEntry);
@@ -341,6 +349,27 @@ public class GbSpreadsheetService {
 		return;
 	}
 
+	String asStringValue(Object val) {
+		
+		String value = null;
+		if (val instanceof PostalAddress) {
+			value = ((PostalAddress) val).getAddress();
+		} else if (val instanceof PhoneNumber) {
+			value = ((PhoneNumber) val).getNumber();
+		} else if (val instanceof Category) {
+			value = ((Category) val).getCategory();						
+		} else if (val instanceof Email) {
+			value = ((Email) val).getEmail();
+		} else if (val instanceof Date) {
+			value = String.valueOf(((Date) val).getTime());
+		} else if (val instanceof Rating) {
+			value = String.valueOf(((Rating) val).getRating());
+		} else {
+			value = val.toString();
+		}
+		return value;
+	}
+	
 	/**
 	 * 
 	 * @param i

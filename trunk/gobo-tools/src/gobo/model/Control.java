@@ -1,6 +1,7 @@
 package gobo.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.slim3.datastore.Attribute;
 import org.slim3.datastore.Model;
@@ -23,6 +24,8 @@ public class Control implements Serializable {
 
     // 処理済み行数
     private Integer count;
+    
+    private Date date;
     
     @Override
     public int hashCode() {
@@ -99,6 +102,20 @@ public class Control implements Serializable {
 	 */
 	public Integer getCount() {
 		return count;
+	}
+
+	/**
+	 * @param date the date to set
+	 */
+	public void setDate(Date date) {
+		this.date = date;
+	}
+
+	/**
+	 * @return the date
+	 */
+	public Date getDate() {
+		return date;
 	}
 	
 }

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.slim3.util.AppEngineUtil;
-import org.slim3.util.ClassUtil;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -68,7 +67,7 @@ public class GbDatastoreService {
 				Map<String, Object> props = new HashMap<String, Object>();
 				for (Property property : entityProto.propertys()) {
 					final String name = property.getName();
-					final String type = property.getValue().toString().split(":")[0];
+					final String type = property.getValue().toString().split("[{:]")[0];
 					props.put(name, type);
 				}
 				final String kindName =
@@ -95,19 +94,7 @@ public class GbDatastoreService {
 			if ((keyValue == null) || (keyValue.length() == 0)) {
 				entity = new Entity(wsTitle);
 			} else {
-				String[] keypaths = keyValue.split("/");
-				Key key = null;
-				for (String path : keypaths) {
-					String[] split = path.split("[()]");
-					String kind = split[0];
-					String keyVal = split[1];
-					if (keyVal.startsWith("\"")) {
-						keyVal = keyVal.replaceAll("\"", "");
-						key = KeyFactory.createKey(key, kind, keyVal);
-					} else {
-						key = KeyFactory.createKey(key, kind, Integer.parseInt(keyVal));
-					}
-				}
+				Key key = parseKey(keyValue);
 				entity = new Entity(key);
 			}
 
@@ -116,9 +103,13 @@ public class GbDatastoreService {
 				final String propName = data[0][col];
 				final String propType = data[1][col];
 				final String value = data[row][col];
-				//Object typedValue = asValueType(propType, value);
-				//entity.setProperty(propName, typedValue);
-				entity.setProperty(propName, value);
+				try {
+					Object typedValue = asTypedValue(propType, value);
+					entity.setProperty(propName, typedValue);
+					// entity.setProperty(propName, value);
+				} catch (RuntimeException e) {
+					System.err.println(e.getMessage());
+				}
 			}
 			System.out.println(entity);
 			if (entity.getProperties().size() <= 1) {
@@ -131,6 +122,30 @@ public class GbDatastoreService {
 		return;
 	}
 
+	/**
+	 * Key.toString() -> Key
+	 * 
+	 * @param keyValue
+	 * @return
+	 */
+	Key parseKey(String keyValue) {
+
+		String[] keypaths = keyValue.split("/");
+		Key key = null;
+		for (String path : keypaths) {
+			String[] split = path.split("[()]");
+			String kind = split[0];
+			String keyVal = split[1];
+			if (keyVal.startsWith("\"")) {
+				keyVal = keyVal.replaceAll("\"", "");
+				key = KeyFactory.createKey(key, kind, keyVal);
+			} else {
+				key = KeyFactory.createKey(key, kind, Integer.parseInt(keyVal));
+			}
+		}
+		return key;
+	}
+
 	Map<String, Class<?>> map = new HashMap<String, Class<?>>();
 	{
 		map.put("stringValue", String.class);
@@ -141,26 +156,27 @@ public class GbDatastoreService {
 		map.put("ReferenceValue", Key.class);
 	}
 
-	Object asValueType(String type, String value) {
+	Object asTypedValue(String type, String value) {
 
-		Class<?> clazz = map.get(type);
-		Object instance = ClassUtil.newInstance(clazz);
-		Object dataType = null;
-		if (instance instanceof String) {
-			dataType = value;
-		} else if (instance instanceof Long) {
-			dataType = new Long(value);
-		} else if (instance instanceof Double) {
-			dataType = new Double(value);
-		} else if (instance instanceof Boolean) {
-			dataType = new Boolean(value);
-		} else if (instance instanceof User) {
-			// dataType = new User(value);
+		Object val = null;
+		if ((type == null) || (type.length() == 0)) {
+			val = value;
+		} else if (type.equals("stringValue")) {
+			val = value;
+		} else if (type.equals("int64Value")) {
+			val = new Long(value);
+		} else if (type.equals("doubleValue")) {
+			val = new Double(value);
+		} else if (type.equals("booleanValue")) {
+			val = new Boolean(value);
+		} else if (type.equals("UserValue")) {
 			throw new RuntimeException("User type is not supported. value=" + value);
-		} else if (instance instanceof Key) {
-			// dataType = new User(value);
-			throw new RuntimeException("ReferenceValue type is not supported." + value);
+		} else if (type.equals("ReferenceValue")) {
+			val = parseKey(value);
+		} else {
+			val = value;
 		}
-		return dataType;
+		return val;
 	}
+
 }
