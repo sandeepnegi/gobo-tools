@@ -1,15 +1,9 @@
 package other;
 
-import gobo.service.GbDatastoreService;
-
 import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
-
-import javax.xml.ws.Action;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.slim3.datastore.Datastore;
 import org.slim3.tester.AppEngineTestCase;
@@ -19,6 +13,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.IMHandle;
 import com.google.appengine.api.datastore.Link;
 import com.google.appengine.api.datastore.PhoneNumber;
@@ -26,10 +21,8 @@ import com.google.appengine.api.datastore.PostalAddress;
 import com.google.appengine.api.datastore.Rating;
 import com.google.appengine.api.datastore.IMHandle.Scheme;
 import com.google.appengine.api.users.User;
-import com.google.gdata.data.extensions.GeoPt;
 import com.google.gdata.util.ServiceException;
 
-@SuppressWarnings("deprecation")
 public class ValueTypeTest extends AppEngineTestCase {
 
 	@Test
@@ -48,7 +41,7 @@ public class ValueTypeTest extends AppEngineTestCase {
 		entity.setProperty("Key", Datastore.createKey("test", 1));
 		entity.setProperty("Category", new Category("test"));
 		entity.setProperty("Email", new Email("test@example"));
-		//entity.setProperty("GeoPt", new GeoPt());
+		entity.setProperty("GeoPt", new GeoPt(1, 1));
 		entity.setProperty("IMHandle", new IMHandle(Scheme.valueOf("sip"), "test"));
 		entity.setProperty("Link", new Link("test"));
 		entity.setProperty("PhoneNumber", new PhoneNumber("000"));
@@ -58,9 +51,6 @@ public class ValueTypeTest extends AppEngineTestCase {
 		DatastoreService service = DatastoreServiceFactory.getDatastoreService();
 		service.put(entity);
 
-		GbDatastoreService gds = new GbDatastoreService();
-		Map<String, Map<String, Object>> kindInfos = gds.getKindInfos();
-		System.out.println(kindInfos);
 	}
 	
 	@After

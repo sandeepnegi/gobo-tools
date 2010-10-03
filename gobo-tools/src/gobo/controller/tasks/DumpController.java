@@ -1,6 +1,7 @@
 package gobo.controller.tasks;
 
 import gobo.model.Control;
+import gobo.service.GbDatastoreService;
 import gobo.service.GbSpreadsheetService;
 
 import java.util.ArrayList;
@@ -46,8 +47,8 @@ public class DumpController extends Controller {
 		}
 		QueryResultList<Entity> data = query.limit(RANGE).asQueryResultList();
 
+		// Call the last chain.
 		if ((data == null) || (data.size() == 0)) {
-			// Call the last chain.
 			queue.add(TaskOptions.Builder.url("/tasks/dumpEnd").param(
 				"controlId",
 				Datastore.keyToString(controlId)).param("kind", kind).method(Method.GET));
@@ -66,8 +67,15 @@ public class DumpController extends Controller {
 			list.add(map);
 		}
 
-		// Add to Spreadsheet.
+		// Prepare table only at first chain.
 		GbSpreadsheetService service = new GbSpreadsheetService(token);
+		if (cursor == null) {
+			Map<String, Object> properties = GbDatastoreService.getProperties(kind);
+			service.updateWorksheetSize(ssKey, kind, properties.size());
+			service.createTableInWorksheet(ssKey, kind, properties);
+		}
+
+		// Add to Spreadsheet.
 		service.dumpData(ssKey, kind, tableId, list);
 
 		// Update the control table.

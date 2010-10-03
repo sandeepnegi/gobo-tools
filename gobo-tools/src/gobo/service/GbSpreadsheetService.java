@@ -13,9 +13,14 @@ import java.util.Map;
 import com.google.appengine.api.datastore.Category;
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.GeoPt;
+import com.google.appengine.api.datastore.IMHandle;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Link;
 import com.google.appengine.api.datastore.PhoneNumber;
 import com.google.appengine.api.datastore.PostalAddress;
 import com.google.appengine.api.datastore.Rating;
+import com.google.appengine.api.users.User;
 import com.google.apphosting.api.ApiProxy;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.client.spreadsheet.CellQuery;
@@ -210,14 +215,14 @@ public class GbSpreadsheetService {
 
 	/**
 	 * 
-	 * @param kinds
+	 * @param targetKinds
 	 * @return
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws ServiceException
 	 */
-	public String createSpreadsheet(List<String> kinds) throws MalformedURLException, IOException,
-			ServiceException {
+	public String createSpreadsheet(List<String> targetKinds) throws MalformedURLException,
+			IOException, ServiceException {
 
 		// Create "docs".SpreadsheetEntry
 		final String appId = ApiProxy.getCurrentEnvironment().getAppId();
@@ -235,39 +240,60 @@ public class GbSpreadsheetService {
 		spreadsheetQuery.setTitleQuery(fileName);
 		SpreadsheetFeed spreadsheetFeed = ss.query(spreadsheetQuery, SpreadsheetFeed.class);
 		SpreadsheetEntry spreadsheetEntry = spreadsheetFeed.getEntries().get(0);
-		final String ssKey = spreadsheetEntry.getKey();
-
-		// Get Kind and Property Info
-		Map<String, Map<String, Object>> kindInfos = GbDatastoreService.getKindInfos();
-		String kind = kinds.get(0);
-		Map<String, Object> props = kindInfos.get(kind);
 
 		// Modifying a default worksheet
 		URL worksheetFeedUrl = spreadsheetEntry.getWorksheetFeedUrl();
 		WorksheetFeed worksheetFeed = ss.getFeed(worksheetFeedUrl, WorksheetFeed.class);
 		WorksheetEntry defaultWorksheet = worksheetFeed.getEntries().get(0);
-		defaultWorksheet.setTitle(new PlainTextConstruct(kinds.get(0)));
+		defaultWorksheet.setTitle(new PlainTextConstruct(targetKinds.get(0)));
 		defaultWorksheet.setRowCount(2);
-		defaultWorksheet.setColCount(props.size() + 1);
+		// Map<String, Object> properties =
+		// GbDatastoreService.getProperties(targetKinds.get(0));
+		// defaultWorksheet.setColCount(properties.size() + 1);
 		defaultWorksheet.update();
 
-		createTableInWorksheet(ssKey, kind, props);
-
 		// Adding Worksheets
-		for (int i = 1; i < kinds.size(); i++) {
-			kind = kinds.get(i);
-			props = kindInfos.get(kind);
-
+		for (int i = 1; i < targetKinds.size(); i++) {
 			WorksheetEntry newWorksheet = new WorksheetEntry();
-			newWorksheet.setTitle(new PlainTextConstruct(kinds.get(i)));
+			newWorksheet.setTitle(new PlainTextConstruct(targetKinds.get(i)));
 			newWorksheet.setRowCount(2);
-			newWorksheet.setColCount(props.size() + 1);
+			// properties =
+			// GbDatastoreService.getProperties(targetKinds.get(i));
+			// newWorksheet.setColCount(properties.size() + 1);
 			ss.insert(worksheetFeedUrl, newWorksheet);
-
-			createTableInWorksheet(ssKey, kind, props);
 		}
 
 		return spreadsheetEntry.getKey();
+	}
+
+	public void updateWorksheetSize(String ssKey, String kind, Integer columnSize)
+			throws IOException, ServiceException {
+
+		// Search Spreadsheet
+		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
+		SpreadsheetQuery spreadsheetQuery =
+			new SpreadsheetQuery(urlFactory.getSpreadsheetsFeedUrl());
+		SpreadsheetFeed spreadsheetFeed = ss.query(spreadsheetQuery, SpreadsheetFeed.class);
+		SpreadsheetEntry spreadsheetEntry = null;
+		for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
+			if (ssKey.equals(entry.getKey())) {
+				spreadsheetEntry = entry;
+				break;
+			}
+		}
+
+		// Modifying a worksheet column size
+		URL worksheetFeedUrl = spreadsheetEntry.getWorksheetFeedUrl();
+		WorksheetFeed worksheetFeed = ss.getFeed(worksheetFeedUrl, WorksheetFeed.class);
+		WorksheetEntry worksheetEntry = null;
+		for (WorksheetEntry worksheet : worksheetFeed.getEntries()) {
+			if (kind.equals(worksheet.getTitle().getPlainText())) {
+				worksheetEntry = worksheet;
+				break;
+			}
+		}
+		worksheetEntry.setColCount(columnSize + 1);
+		worksheetEntry.update();
 	}
 
 	/**
@@ -279,9 +305,10 @@ public class GbSpreadsheetService {
 	 * @throws IOException
 	 * @throws ServiceException
 	 */
-	void createTableInWorksheet(String ssKey, String kind, Map<String, Object> columns)
+	public void createTableInWorksheet(String ssKey, String kind, Map<String, Object> columns)
 			throws IOException, ServiceException {
 
+		// Add Table
 		FeedURLFactory factory = FeedURLFactory.getDefault();
 		URL tableFeedUrl = factory.getTableFeedUrl(ssKey);
 
@@ -313,7 +340,8 @@ public class GbSpreadsheetService {
 		RecordEntry newEntry = new RecordEntry();
 		for (int i = 0; i < keys.length; i++) {
 			String columnName = (String) keys[i];
-			String type = (String) columns.get(columnName);
+			// String type = (String) columns.get(columnName);
+			String type = asDataType(columns.get(columnName));
 			newEntry.addField(new Field(null, columnName, type));
 		}
 		ss.insert(recordFeedUrl, newEntry);
@@ -341,7 +369,8 @@ public class GbSpreadsheetService {
 					Object val = row.get(key);
 					String value = asStringValue(val);
 					newEntry.addField(new Field(null, key, value));
-					//newEntry.addField(new Field(null, key, row.get(key).toString()));
+					// newEntry.addField(new Field(null, key,
+					// row.get(key).toString()));
 				}
 			}
 			ss.insert(recordFeedUrl, newEntry);
@@ -349,19 +378,78 @@ public class GbSpreadsheetService {
 		return;
 	}
 
+	public final static String STRING = "String";
+	public final static String INTEGER = "Integer";
+	public final static String SHORT = "Short";
+	public final static String LONG = "Long";
+	public final static String BOOLEAN = "Boolean";
+	public final static String FLOAT = "Float";
+	public final static String DOUBLE = "Double";
+	public final static String DATE = "Date";
+	public final static String USER = "User";
+	public final static String KEY = "Key";
+	public final static String CATEGORY = "Category";
+	public final static String EMAIL = "Email";
+	public final static String GEO_PT = "GeoPt";
+	public final static String IMHANDLE = "IMHandle";
+	public final static String LINK = "Link";
+	public final static String PHONE_NUMBER = "PhoneNumber";
+	public final static String POSTAL_ADDRESS = "PostalAddress";
+	public final static String RATING = "Rating";
+
+	String asDataType(Object clazz) {
+		String type = null;
+		if (clazz instanceof String) {
+			type = STRING;
+		} else if (clazz instanceof Integer) {
+			type = INTEGER;
+		} else if (clazz instanceof Short) {
+			type = SHORT;
+		} else if (clazz instanceof Long) {
+			type = LONG;
+		} else if (clazz instanceof Boolean) {
+			type = BOOLEAN;
+		} else if (clazz instanceof Float) {
+			type = FLOAT;
+		} else if (clazz instanceof Double) {
+			type = DOUBLE;
+		} else if (clazz instanceof Date) {
+			type = DATE;
+		} else if (clazz instanceof User) {
+			type = USER;
+		} else if (clazz instanceof Key) {
+			type = KEY;
+		} else if (clazz instanceof Category) {
+			type = CATEGORY;
+		} else if (clazz instanceof Email) {
+			type = EMAIL;
+		} else if (clazz instanceof GeoPt) {
+			type = GEO_PT;
+		} else if (clazz instanceof IMHandle) {
+			type = IMHANDLE;
+		} else if (clazz instanceof Link) {
+			type = LINK;
+		} else if (clazz instanceof PhoneNumber) {
+			type = PHONE_NUMBER;
+		} else if (clazz instanceof PostalAddress) {
+			type = POSTAL_ADDRESS;
+		} else if (clazz instanceof Rating) {
+			type = RATING;
+		}
+		return type;
+	}
+
 	String asStringValue(Object val) {
-		
+
 		String value = null;
 		if (val instanceof PostalAddress) {
 			value = ((PostalAddress) val).getAddress();
 		} else if (val instanceof PhoneNumber) {
 			value = ((PhoneNumber) val).getNumber();
 		} else if (val instanceof Category) {
-			value = ((Category) val).getCategory();						
+			value = ((Category) val).getCategory();
 		} else if (val instanceof Email) {
 			value = ((Email) val).getEmail();
-		} else if (val instanceof Date) {
-			value = String.valueOf(((Date) val).getTime());
 		} else if (val instanceof Rating) {
 			value = String.valueOf(((Rating) val).getRating());
 		} else {
@@ -369,7 +457,7 @@ public class GbSpreadsheetService {
 		}
 		return value;
 	}
-	
+
 	/**
 	 * 
 	 * @param i
