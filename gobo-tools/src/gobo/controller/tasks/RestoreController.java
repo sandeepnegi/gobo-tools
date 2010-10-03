@@ -1,7 +1,10 @@
 package gobo.controller.tasks;
 
+import java.util.List;
+
 import gobo.model.Control;
 import gobo.service.GbDatastoreService;
+import gobo.service.GbEntity;
 import gobo.service.GbSpreadsheetService;
 
 import org.slim3.controller.Controller;
@@ -31,8 +34,11 @@ public class RestoreController extends Controller {
 
 		// Spreadsheetからデータを取得
 		GbSpreadsheetService service = new GbSpreadsheetService(token);
-		String[][] data = service.getData(ssKey, wsTitle, rowNum + 1, RANGE);
-		if (data == null) {
+		List<GbEntity> data2 = service.getData2(ssKey, wsTitle, rowNum + 1, RANGE);
+
+		// String[][] data = service.getData(ssKey, wsTitle, rowNum + 1, RANGE);
+		// if (data == null) {
+		if (data2 == null) {
 			// チェーンの最終タスクを呼んで終了
 			queue.add(TaskOptions.Builder.url("/tasks/restoreEnd").param(
 				"controlId",
@@ -42,8 +48,9 @@ public class RestoreController extends Controller {
 
 		// Restoring to Datastore.
 		GbDatastoreService datastoreUtil = new GbDatastoreService();
-		datastoreUtil.restoreData(wsTitle, data);
-		
+		// datastoreUtil.restoreData(wsTitle, data);
+		datastoreUtil.restoreData2(wsTitle, data2);
+
 		// コントロールテーブルを更新
 		Key childKey = Datastore.createKey(controlId, Control.class, wsTitle);
 		Control control = Datastore.get(Control.class, childKey);

@@ -36,8 +36,6 @@ import com.google.gdata.data.spreadsheet.Column;
 import com.google.gdata.data.spreadsheet.Data;
 import com.google.gdata.data.spreadsheet.Field;
 import com.google.gdata.data.spreadsheet.Header;
-import com.google.gdata.data.spreadsheet.ListEntry;
-import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.data.spreadsheet.RecordEntry;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
@@ -115,38 +113,40 @@ public class GbSpreadsheetService {
 		return list;
 	}
 
-	/**
-	 * データ一覧
-	 * 
-	 * @param ssKey
-	 * @param wsID
-	 * @param startIndex
-	 * @param maxResult
-	 * @return
-	 * @throws IOException
-	 * @throws ServiceException
-	 */
-	public List<Map<String, String>> _getData(String ssKey, String wsID, Integer startIndex,
-			Integer maxResult) throws IOException, ServiceException {
-
-		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
-		WorksheetQuery worksheetQuery =
-			new WorksheetQuery(urlFactory.getListFeedUrl(ssKey, wsID, "private", "values"));
-		worksheetQuery.setStartIndex(startIndex);
-		worksheetQuery.setMaxResults(maxResult);
-		ListFeed listFeed = ss.query(worksheetQuery, ListFeed.class);
-
-		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-		for (ListEntry entry : listFeed.getEntries()) {
-			// System.out.println(row.getTitle().getPlainText());
-			Map<String, String> row = new HashMap<String, String>();
-			for (String tag : entry.getCustomElements().getTags()) {
-				row.put(tag, entry.getCustomElements().getValue(tag));
-			}
-			list.add(row);
-		}
-		return list;
-	}
+	// /**
+	// * データ一覧
+	// *
+	// * @param ssKey
+	// * @param wsID
+	// * @param startIndex
+	// * @param maxResult
+	// * @return
+	// * @throws IOException
+	// * @throws ServiceException
+	// */
+	// public List<Map<String, String>> _getData(String ssKey, String wsID,
+	// Integer startIndex,
+	// Integer maxResult) throws IOException, ServiceException {
+	//
+	// FeedURLFactory urlFactory = FeedURLFactory.getDefault();
+	// WorksheetQuery worksheetQuery =
+	// new WorksheetQuery(urlFactory.getListFeedUrl(ssKey, wsID, "private",
+	// "values"));
+	// worksheetQuery.setStartIndex(startIndex);
+	// worksheetQuery.setMaxResults(maxResult);
+	// ListFeed listFeed = ss.query(worksheetQuery, ListFeed.class);
+	//
+	// List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+	// for (ListEntry entry : listFeed.getEntries()) {
+	// // System.out.println(row.getTitle().getPlainText());
+	// Map<String, String> row = new HashMap<String, String>();
+	// for (String tag : entry.getCustomElements().getTags()) {
+	// row.put(tag, entry.getCustomElements().getValue(tag));
+	// }
+	// list.add(row);
+	// }
+	// return list;
+	// }
 
 	/**
 	 * get data from spreadsheet
@@ -209,6 +209,80 @@ public class GbSpreadsheetService {
 			int row = Integer.parseInt(shortId.substring(1, shortId.lastIndexOf('C')));
 			int col = Integer.parseInt(shortId.substring(shortId.lastIndexOf('C') + 1));
 			data[row - startIndex + 2][col - 1] = cell.getCell().getValue();
+		}
+		return data;
+	}
+
+	public List<GbEntity> getData2(String ssKey, String kind, Integer startIndex, Integer maxRows)
+			throws IOException, ServiceException {
+
+		/*
+		 * This code doesn't use list-base feed but cell-base feed. because The
+		 * columnNames are case-insensitive in list-base feed.
+		 */
+
+		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
+		WorksheetQuery worksheetQuery =
+			new WorksheetQuery(urlFactory.getWorksheetFeedUrl(ssKey, "private", "values"));
+		worksheetQuery.setTitleQuery(kind);
+		WorksheetFeed spreadsheetFeed = ss.query(worksheetQuery, WorksheetFeed.class);
+		WorksheetEntry workSheet = spreadsheetFeed.getEntries().get(0);
+		final int colCount = workSheet.getColCount();
+		// final int rowCount = maxRows + 2;
+		String[] columnTitle = new String[colCount];
+		String[] dataType = new String[colCount];
+
+		URL cellFeedUrl = workSheet.getCellFeedUrl();
+		CellQuery query = new CellQuery(cellFeedUrl);
+
+		// Title & Type
+		query.setMinimumRow(1);
+		query.setMaximumRow(2);
+		CellFeed feed = ss.query(query, CellFeed.class);
+		for (CellEntry cell : feed.getEntries()) {
+			String shortId = cell.getId().substring(cell.getId().lastIndexOf('/') + 1);
+			// System.out.println(shortId + ":" + cell.getCell().getValue());
+			int row = Integer.parseInt(shortId.substring(1, shortId.lastIndexOf('C')));
+			int col = Integer.parseInt(shortId.substring(shortId.lastIndexOf('C') + 1));
+			if (row == 1) {
+				columnTitle[col - 1] = cell.getCell().getValue();
+			} else {
+				dataType[col - 1] = cell.getCell().getValue();
+			}
+		}
+
+		// Data (start from line no.3)
+		query.setMinimumRow(startIndex);
+		final int nextMax = startIndex + maxRows - 1;
+		final int maxRowCount = workSheet.getRowCount();
+		final int maxRow = (nextMax > maxRowCount) ? maxRowCount : nextMax;
+		System.out.println(startIndex + "〜" + maxRow);
+		if (startIndex >= maxRow) {
+			return null;
+		}
+		query.setMaximumRow(maxRow);
+		feed = ss.query(query, CellFeed.class);
+		int prevRow = -1;
+		GbEntity gbEntity = null;
+		List<GbEntity> data = new ArrayList<GbEntity>();
+		for (CellEntry cell : feed.getEntries()) {
+			String shortId = cell.getId().substring(cell.getId().lastIndexOf('/') + 1);
+			
+			int row = Integer.parseInt(shortId.substring(1, shortId.lastIndexOf('C')));
+			if (prevRow != row) {
+				prevRow = row;
+				gbEntity = new GbEntity();
+				gbEntity.setKeyString(cell.getCell().getValue());
+				data.add(gbEntity);
+				continue;
+			}
+			
+			int col = Integer.parseInt(shortId.substring(shortId.lastIndexOf('C') + 1));
+			GbProperty gbProperty = new GbProperty();
+			gbProperty.setName(columnTitle[col - 1]);
+			gbProperty.setValueType(dataType[col - 1]);
+			gbProperty.setValue(cell.getCell().getValue());
+			gbEntity.addProperty(gbProperty);
 		}
 		return data;
 	}
