@@ -1,23 +1,26 @@
 package gobo.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slim3.datastore.Datastore;
 import org.slim3.util.AppEngineUtil;
 
+import com.google.appengine.api.datastore.Category;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PostalAddress;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Rating;
 import com.google.appengine.api.users.User;
-import com.google.apphosting.api.DatastorePb.Schema;
-import com.google.storage.onestore.v3.OnestoreEntity.EntityProto;
-import com.google.storage.onestore.v3.OnestoreEntity.Property;
+import com.google.gdata.model.gd.PhoneNumber;
 
 public class GbDatastoreService {
 
@@ -41,41 +44,10 @@ public class GbDatastoreService {
 		return kinds;
 	}
 
-	/**
-	 * Get kind and property info.
-	 * 
-	 * @return
-	 */
-	public static Map<String, Map<String, Object>> getKindInfos() {
+	public static Map<String, Object> getProperties(String kind) {
 
-		Map<String, Map<String, Object>> kindInfos = new HashMap<String, Map<String, Object>>();
-		if (AppEngineUtil.isProduction()) {
-
-			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-			List<Entity> list =
-				datastore.prepare(new Query("__Stat_PropertyType_PropertyName_Kind__")).asList(
-					FetchOptions.Builder.withOffset(0));
-			for (Entity kind : list) {
-				kindInfos.put((String) kind.getProperty("kind_name"), kind.getProperties());
-			}
-
-		} else {
-
-			Schema schema = org.slim3.datastore.DatastoreUtil.getSchema();
-			List<EntityProto> entityProtoList = schema.kinds();
-			for (EntityProto entityProto : entityProtoList) {
-				Map<String, Object> props = new HashMap<String, Object>();
-				for (Property property : entityProto.propertys()) {
-					final String name = property.getName();
-					final String type = property.getValue().toString().split("[{:]")[0];
-					props.put(name, type);
-				}
-				final String kindName =
-					org.slim3.datastore.DatastoreUtil.getKind(entityProto.getKey());
-				kindInfos.put(kindName, props);
-			}
-		}
-		return kindInfos;
+		Entity entity = Datastore.query(kind).limit(1).asSingleEntity();
+		return entity.getProperties();
 	}
 
 	/**
@@ -101,12 +73,11 @@ public class GbDatastoreService {
 			// Properties
 			for (int col = 1; col < data[row].length; col++) {
 				final String propName = data[0][col];
-				final String propType = data[1][col];
+				final String dataType = data[1][col];
 				final String value = data[row][col];
 				try {
-					Object typedValue = asTypedValue(propType, value);
+					Object typedValue = asTypedValue(dataType, value);
 					entity.setProperty(propName, typedValue);
-					// entity.setProperty(propName, value);
 				} catch (RuntimeException e) {
 					System.err.println(e.getMessage());
 				}
@@ -146,32 +117,40 @@ public class GbDatastoreService {
 		return key;
 	}
 
-	Map<String, Class<?>> map = new HashMap<String, Class<?>>();
-	{
-		map.put("stringValue", String.class);
-		map.put("int64Value", Long.class);
-		map.put("doubleValue", Double.class);
-		map.put("booleanValue", Boolean.class);
-		map.put("UserValue", User.class);
-		map.put("ReferenceValue", Key.class);
-	}
-
 	Object asTypedValue(String type, String value) {
 
 		Object val = null;
 		if ((type == null) || (type.length() == 0)) {
 			val = value;
-		} else if (type.equals("stringValue")) {
+		} else if (type.equals(GbSpreadsheetService.STRING)) {
 			val = value;
-		} else if (type.equals("int64Value")) {
+		} else if (type.equals(GbSpreadsheetService.LONG)) {
 			val = new Long(value);
-		} else if (type.equals("doubleValue")) {
+		} else if (type.equals(GbSpreadsheetService.DOUBLE)) {
 			val = new Double(value);
-		} else if (type.equals("booleanValue")) {
-			val = new Boolean(value);
-		} else if (type.equals("UserValue")) {
-			throw new RuntimeException("User type is not supported. value=" + value);
-		} else if (type.equals("ReferenceValue")) {
+		} else if (type.equals(GbSpreadsheetService.BOOLEAN)) {
+			if (value != null) {
+				val = new Boolean(value);
+			}
+		} else if (type.equals(GbSpreadsheetService.DATE)) {
+			throw new RuntimeException("Date type is not supported. value=" + value);
+		} else if (type.equals(GbSpreadsheetService.CATEGORY)) {
+			val = new Category(value);
+		} else if (type.equals(GbSpreadsheetService.EMAIL)) {
+			val = new Email(value);
+		} else if (type.equals(GbSpreadsheetService.PHONE_NUMBER)) {
+			val = new PhoneNumber(value);
+		} else if (type.equals(GbSpreadsheetService.POSTAL_ADDRESS)) {
+			val = new PostalAddress(value);
+		} else if (type.equals(GbSpreadsheetService.RATING)) {
+			val = new Rating(Integer.parseInt(value));
+		} else if (type.equals(GbSpreadsheetService.USER)) {
+			String[] split = value.split(",");
+			val = new User(split[0], split[1]);
+		} else if (type.equals(GbSpreadsheetService.GEO_PT)) {
+			String[] split = value.split(",");
+			val = new GeoPt(Float.parseFloat(split[0]), Float.parseFloat(split[1]));
+		} else if (type.equals(GbSpreadsheetService.KEY)) {
 			val = parseKey(value);
 		} else {
 			val = value;
