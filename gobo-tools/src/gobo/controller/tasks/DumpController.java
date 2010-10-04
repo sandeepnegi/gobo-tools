@@ -55,7 +55,7 @@ public class DumpController extends Controller {
 			return null;
 		}
 
-		// Repackage.
+		// Re-package.
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		for (Entity entity : data) {
 			Map<String, Object> map = new HashMap<String, Object>();

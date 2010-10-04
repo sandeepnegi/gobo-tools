@@ -1,4 +1,6 @@
-package gobo.service;
+package gobo.dto;
+
+import gobo.service.GbDatastoreService;
 
 import java.util.ArrayList;
 import java.util.List;

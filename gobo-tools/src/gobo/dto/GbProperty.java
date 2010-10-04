@@ -1,4 +1,7 @@
-package gobo.service;
+package gobo.dto;
+
+import gobo.service.GbDatastoreService;
+import gobo.service.GbSpreadsheetService;
 
 import com.google.appengine.api.datastore.Category;
 import com.google.appengine.api.datastore.Email;
