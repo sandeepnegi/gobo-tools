@@ -209,6 +209,7 @@ public class GbSpreadsheetService {
 		WorksheetEntry defaultWorksheet = worksheetFeed.getEntries().get(0);
 		defaultWorksheet.setTitle(new PlainTextConstruct(targetKinds.get(0)));
 		defaultWorksheet.setRowCount(2);
+		defaultWorksheet.setColCount(1);
 		defaultWorksheet.update();
 
 		// Adding Worksheets
@@ -216,6 +217,7 @@ public class GbSpreadsheetService {
 			WorksheetEntry newWorksheet = new WorksheetEntry();
 			newWorksheet.setTitle(new PlainTextConstruct(targetKinds.get(i)));
 			newWorksheet.setRowCount(2);
+			newWorksheet.setColCount(1);
 			ss.insert(worksheetFeedUrl, newWorksheet);
 		}
 

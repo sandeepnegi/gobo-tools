@@ -17,6 +17,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.GeoPt;
 import com.google.appengine.api.datastore.IMHandle;
 import com.google.appengine.api.datastore.Link;
 import com.google.appengine.api.datastore.PhoneNumber;
@@ -43,7 +44,7 @@ public class TestdataController extends Controller {
 		entity.setProperty("Key", Datastore.createKey("test", 1));
 		entity.setProperty("Category", new Category("test"));
 		entity.setProperty("Email", new Email("test@example"));
-		// entity.setProperty("GeoPt", new GeoPt());
+		entity.setProperty("GeoPt", new GeoPt(Float.parseFloat("1.0"), Float.parseFloat("1.0")));
 		entity.setProperty("IMHandle", new IMHandle(Scheme.valueOf("sip"), "test"));
 		entity.setProperty("Link", new Link("test"));
 		entity.setProperty("PhoneNumber", new PhoneNumber("000"));
