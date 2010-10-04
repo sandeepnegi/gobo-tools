@@ -132,7 +132,7 @@ public class GbSpreadsheetService {
 		query.setMaximumRow(2);
 		CellFeed feed = ss.query(query, CellFeed.class);
 		for (CellEntry cell : feed.getEntries()) {
-			String shortId = cell.getId().substring(cell.getId().lastIndexOf('/') + 1);
+			final String shortId = cell.getId().substring(cell.getId().lastIndexOf('/') + 1);
 			// System.out.println(shortId + ":" + cell.getCell().getValue());
 			int row = Integer.parseInt(shortId.substring(1, shortId.lastIndexOf('C')));
 			int col = Integer.parseInt(shortId.substring(shortId.lastIndexOf('C') + 1));
@@ -296,7 +296,7 @@ public class GbSpreadsheetService {
 		for (int i = 0; i < properties.size(); i++) {
 			GbProperty gbProperty = properties.get(i);
 			String columnName = gbProperty.getName();
-			String type = gbProperty.asValueType();
+			String type = gbProperty.asSpreadsheetValueType();
 			newEntry.addField(new Field(null, columnName, type));
 		}
 		ss.insert(recordFeedUrl, newEntry);

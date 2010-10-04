@@ -2,7 +2,15 @@ package gobo.dto;
 
 import gobo.service.GbDatastoreService;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import com.google.appengine.api.datastore.Category;
 import com.google.appengine.api.datastore.Email;
@@ -23,64 +31,6 @@ public class GbProperty {
 
 	private Object value;
 
-	public Object asDatastoreValue() {
-
-		Object val = null;
-		if ((valueType == null) || (valueType.length() == 0)) {
-			val = value;
-		} else if (valueType.equals(STRING)) {
-			val = value;
-		} else if (valueType.equals(LONG)) {
-			val = new Long((String) value);
-		} else if (valueType.equals(DOUBLE)) {
-			val = new Double((String) value);
-		} else if (valueType.equals(BOOLEAN)) {
-			val = new Boolean((String) value);
-		} else if (valueType.equals(DATE)) {
-			throw new RuntimeException("Date type is not supported. value=" + value);
-		} else if (valueType.equals(CATEGORY)) {
-			val = new Category((String) value);
-		} else if (valueType.equals(EMAIL)) {
-			val = new Email((String) value);
-		} else if (valueType.equals(PHONE_NUMBER)) {
-			val = new PhoneNumber((String) value);
-		} else if (valueType.equals(POSTAL_ADDRESS)) {
-			val = new PostalAddress((String) value);
-		} else if (valueType.equals(RATING)) {
-			val = new Rating(Integer.parseInt((String) value));
-		} else if (valueType.equals(USER)) {
-			String[] split = ((String) value).split(",");
-			val = new User(split[0], split[1]);
-		} else if (valueType.equals(GEO_PT)) {
-			String[] split = ((String) value).split(",");
-			val = new GeoPt(Float.parseFloat(split[0]), Float.parseFloat(split[1]));
-		} else if (valueType.equals(KEY)) {
-			val = GbDatastoreService.parseKey((String) value);
-		} else {
-			val = value;
-		}
-		return val;
-	}
-
-	public String asSpreadsheetValue() {
-
-		String val = null;
-		if (value instanceof PostalAddress) {
-			val = ((PostalAddress) value).getAddress();
-		} else if (value instanceof PhoneNumber) {
-			val = ((PhoneNumber) value).getNumber();
-		} else if (value instanceof Category) {
-			val = ((Category) value).getCategory();
-		} else if (value instanceof Email) {
-			val = ((Email) value).getEmail();
-		} else if (value instanceof Rating) {
-			val = String.valueOf(((Rating) value).getRating());
-		} else {
-			val = value.toString();
-		}
-		return val;
-	}
-
 	public final static String STRING = "String";
 	public final static String INTEGER = "Integer";
 	public final static String SHORT = "Short";
@@ -99,8 +49,16 @@ public class GbProperty {
 	public final static String PHONE_NUMBER = "PhoneNumber";
 	public final static String POSTAL_ADDRESS = "PostalAddress";
 	public final static String RATING = "Rating";
+	public final static String LIST = "List";
+	public final static String SET = "Set";
+	public final static String SORTED_SET = "SortedSet";
 
-	public String asValueType() {
+	// private static final SimpleDateFormat DATE_FORMAT =
+	// new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
+
+	private static final String VALUE_SEPARATER = "/";
+
+	public String asSpreadsheetValueType() {
 
 		String _valueType = null;
 		if (value instanceof String) {
@@ -139,8 +97,144 @@ public class GbProperty {
 			_valueType = POSTAL_ADDRESS;
 		} else if (value instanceof Rating) {
 			_valueType = RATING;
+		} else if (value instanceof Collection<?>) {
+			Object object = ((Collection<?>) value).iterator().next();
+			GbProperty inner = new GbProperty();
+			inner.setValue(object);
+			final String innerValueType = inner.asSpreadsheetValueType();
+			if (value instanceof List<?>) {
+				_valueType = LIST + "<" + innerValueType + ">";
+			} else if (value instanceof Set<?>) {
+				_valueType = SET + "<" + innerValueType + ">";
+			} else if (value instanceof SortedSet<?>) {
+				_valueType = SORTED_SET + "<" + innerValueType + ">";
+			}
 		}
 		return _valueType;
+	}
+
+	public String asSpreadsheetValue() {
+
+		String val = null;
+		if (value instanceof Date) {
+			// val = DATE_FORMAT.format(((Date) value));
+			val = String.valueOf(((Date) value).getTime());
+		} else if (value instanceof User) {
+			User user = (User) value;
+			val =
+				user.getEmail()
+					+ VALUE_SEPARATER
+					+ user.getAuthDomain()
+					+ VALUE_SEPARATER
+					+ user.getUserId()
+					+ VALUE_SEPARATER
+					+ user.getFederatedIdentity();
+		} else if (value instanceof Category) {
+			val = ((Category) value).getCategory();
+		} else if (value instanceof Email) {
+			val = ((Email) value).getEmail();
+		} else if (value instanceof GeoPt) {
+			GeoPt geoPt = (GeoPt) value;
+			val =
+				Float.valueOf(geoPt.getLatitude())
+					+ VALUE_SEPARATER
+					+ Float.valueOf(geoPt.getLongitude());
+		} else if (value instanceof IMHandle) {
+			val = ((IMHandle) value).toString();
+		} else if (value instanceof Link) {
+			val = ((Link) value).toString();
+		} else if (value instanceof PhoneNumber) {
+			val = ((PhoneNumber) value).getNumber();
+		} else if (value instanceof PostalAddress) {
+			val = ((PostalAddress) value).getAddress();
+		} else if (value instanceof Rating) {
+			val = String.valueOf(((Rating) value).getRating());
+		} else if (value instanceof Collection<?>) {
+			Iterator<?> it = ((Collection<?>) value).iterator();
+			GbProperty inner = new GbProperty();
+			StringBuilder sb = new StringBuilder();
+			while (it.hasNext()) {
+				Object next = it.next();
+				inner.setValue(next);
+				final String innerValue = inner.asSpreadsheetValue();
+				sb.append(innerValue + ",");
+			}
+			val = sb.toString().substring(0, sb.length() - 1);
+		} else {
+			val = value.toString();
+		}
+		return val;
+	}
+
+	public Object asDatastoreValue() {
+
+		Object val = null;
+		if ((valueType == null) || (valueType.length() == 0)) {
+			val = value;
+		} else if (valueType.equals(STRING)) {
+			val = value;
+		} else if (valueType.equals(LONG)) {
+			val = new Long((String) value);
+		} else if (valueType.equals(DOUBLE)) {
+			val = new Double((String) value);
+		} else if (valueType.equals(BOOLEAN)) {
+			val = new Boolean((String) value);
+		} else if (valueType.equals(DATE)) {
+			// try {
+			// val = DATE_FORMAT.parse((String) value);
+			// } catch (ParseException e) {
+			// throw new RuntimeException(e);
+			// }
+			val = new Date(Long.parseLong((String) value));
+		} else if (valueType.equals(CATEGORY)) {
+			val = new Category((String) value);
+		} else if (valueType.equals(EMAIL)) {
+			val = new Email((String) value);
+		} else if (valueType.equals(PHONE_NUMBER)) {
+			val = new PhoneNumber((String) value);
+		} else if (valueType.equals(POSTAL_ADDRESS)) {
+			val = new PostalAddress((String) value);
+		} else if (valueType.equals(RATING)) {
+			val = new Rating(Integer.parseInt((String) value));
+		} else if (valueType.equals(USER)) {
+			String[] split = ((String) value).split("/");
+			val = new User(split[0], split[1], split[2], split[3]);
+		} else if (valueType.equals(GEO_PT)) {
+			String[] split = ((String) value).split("/");
+			val = new GeoPt(Float.parseFloat(split[0]), Float.parseFloat(split[1]));
+		} else if (valueType.equals(KEY)) {
+			val = GbDatastoreService.parseKey((String) value);
+		} else if (valueType.startsWith(LIST + "<")) {
+			List<Object> list = new ArrayList<Object>();
+			String[] split = ((String) value).split(",");
+			for (int i = 0; i < split.length; i++) {
+				GbProperty innser = new GbProperty();
+				innser.setValue(split[i]);
+				list.add(innser.asDatastoreValue());
+			}
+			val = list;
+		} else if (valueType.startsWith(SET + "<")) {
+			Set<Object> list = new HashSet<Object>();
+			String[] split = ((String) value).split(",");
+			for (int i = 0; i < split.length; i++) {
+				GbProperty innser = new GbProperty();
+				innser.setValue(split[i]);
+				list.add(innser.asDatastoreValue());
+			}
+			val = list;
+		} else if (valueType.startsWith(SORTED_SET + "<")) {
+			SortedSet<Object> list = new TreeSet<Object>();
+			String[] split = ((String) value).split(",");
+			for (int i = 0; i < split.length; i++) {
+				GbProperty innser = new GbProperty();
+				innser.setValue(split[i]);
+				list.add(innser.asDatastoreValue());
+			}
+			val = list;
+		} else {
+			val = value;
+		}
+		return val;
 	}
 
 	/**
