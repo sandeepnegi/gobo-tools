@@ -1,5 +1,8 @@
 package gobo.service;
 
+import gobo.dto.GbEntity;
+import gobo.dto.GbProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,55 +42,12 @@ public class GbDatastoreService {
 
 	public static Map<String, Object> getProperties(String kind) {
 
-		Entity entity = Datastore.query(kind).limit(1).asSingleEntity();
+		Entity entity = Datastore.query(kind).limit(1).asList().get(0);
 		return entity.getProperties();
+
 	}
 
-	/**
-	 * 
-	 * @param wsTitle
-	 * @param data
-	 */
-	// public void restoreData(String wsTitle, String[][] data) {
-	//
-	// List<Entity> list = new ArrayList<Entity>();
-	// for (int row = 2; row < data.length; row++) {
-	//
-	// // parsing Key
-	// String keyValue = data[row][0];
-	// Entity entity = null;
-	// if ((keyValue == null) || (keyValue.length() == 0)) {
-	// entity = new Entity(wsTitle);
-	// } else {
-	// Key key = parseKey(keyValue);
-	// entity = new Entity(key);
-	// }
-	//
-	// // Properties
-	// for (int col = 1; col < data[row].length; col++) {
-	// final String propName = data[0][col];
-	// final String dataType = data[1][col];
-	// final String value = data[row][col];
-	// try {
-	// Object typedValue = asTypedValue(dataType, value);
-	// entity.setProperty(propName, typedValue);
-	// } catch (RuntimeException e) {
-	// System.err.println(e.getMessage());
-	// }
-	// }
-	// System.out.println(entity);
-	// if (entity.getProperties().size() <= 1) {
-	// break;
-	// }
-	// list.add(entity);
-	// }
-	// DatastoreService datastoreService =
-	// DatastoreServiceFactory.getDatastoreService();
-	// datastoreService.put(list);
-	// return;
-	// }
-
-	public void restoreData2(String wsTitle, List<GbEntity> data) {
+	public void restoreData(String wsTitle, List<GbEntity> data) {
 
 		List<Entity> list = new ArrayList<Entity>();
 		for (GbEntity gbEntity : data) {
