@@ -8,7 +8,7 @@
 <title></title>
 </head>
 <body>
-Started to dump!<br />
+Started to drop!<br />
 <a href="${f:url("/")}">back</a>
 </body>
 </html>
