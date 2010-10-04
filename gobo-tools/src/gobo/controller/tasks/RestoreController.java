@@ -34,7 +34,7 @@ public class RestoreController extends Controller {
 
 		// Spreadsheetからデータを取得
 		GbSpreadsheetService service = new GbSpreadsheetService(token);
-		List<GbEntity> data2 = service.getData(ssKey, wsTitle, rowNum + 1, RANGE);
+		List<GbEntity> data2 = service.getDataOrNull(ssKey, wsTitle, rowNum + 1, RANGE);
 
 		// String[][] data = service.getData(ssKey, wsTitle, rowNum + 1, RANGE);
 		// if (data == null) {

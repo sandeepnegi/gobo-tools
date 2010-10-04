@@ -40,11 +40,18 @@ public class GbDatastoreService {
 		return kinds;
 	}
 
-	public static Map<String, Object> getProperties(String kind) {
+	public static List<GbProperty> getProperties(String kind) {
 
 		Entity entity = Datastore.query(kind).limit(1).asList().get(0);
-		return entity.getProperties();
-
+		Map<String, Object> properties = entity.getProperties();
+		List<GbProperty> list = new ArrayList<GbProperty>();
+		for (String name : properties.keySet()) {
+			GbProperty gbProperty = new GbProperty();
+			gbProperty.setName(name);
+			gbProperty.setValue(properties.get(name));
+			list.add(gbProperty);
+		}
+		return list;
 	}
 
 	public void restoreData(String wsTitle, List<GbEntity> data) {
@@ -64,7 +71,7 @@ public class GbDatastoreService {
 			// Properties
 			for (GbProperty gbProperty : gbEntity.getProperties()) {
 				try {
-					entity.setProperty(gbProperty.getName(), gbProperty.asTypedValue());
+					entity.setProperty(gbProperty.getName(), gbProperty.asDatastoreValue());
 				} catch (RuntimeException e) {
 					System.err.println(e.getMessage());
 				}
