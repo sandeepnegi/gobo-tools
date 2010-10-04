@@ -8,7 +8,7 @@
 <title></title>
 </head>
 <body>
-リストアを開始しました。<br />
-<a href="${f:url("/")}">戻る</a>
+Started to restore!<br />
+<a href="${f:url("/")}">back</a>
 </body>
 </html>
