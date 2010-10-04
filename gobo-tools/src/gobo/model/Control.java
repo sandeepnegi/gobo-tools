@@ -8,7 +8,7 @@ import org.slim3.datastore.Model;
 
 import com.google.appengine.api.datastore.Key;
 
-@Model(kind = "Control")
+@Model(kind = "CONTROL")
 public class Control implements Serializable {
 
     private static final long serialVersionUID = 1L;
