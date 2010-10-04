@@ -60,6 +60,9 @@ public class GbProperty {
 
 	public String asSpreadsheetValueType() {
 
+		if (value == null) {
+			return null;
+		}
 		String _valueType = null;
 		if (value instanceof String) {
 			_valueType = STRING;
@@ -115,6 +118,10 @@ public class GbProperty {
 
 	public String asSpreadsheetValue() {
 
+		if (value == null) {
+			return null;
+		}
+			
 		String val = null;
 		if (value instanceof Date) {
 			// val = DATE_FORMAT.format(((Date) value));

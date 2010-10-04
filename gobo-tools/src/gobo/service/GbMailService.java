@@ -24,10 +24,10 @@ public class GbMailService {
 		message1.setSubject("["+ controlId + "]" + task + "終了");
 		message1.setSender("gobo@appspot.com");
 		message1.setTextBody("["+ controlId + "]" + task + "終了");
-		try {
-			mailService.send(message1);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());;
-		}
+//		try {
+//			//mailService.send(message1);
+//		} catch (IOException e) {
+//			System.err.println(e.getMessage());;
+//		}
 	}
 }
