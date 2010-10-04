@@ -1,13 +1,13 @@
 package gobo.controller.tasks;
 
+import gobo.dto.GbEntity;
+import gobo.dto.GbProperty;
 import gobo.model.Control;
 import gobo.service.GbDatastoreService;
 import gobo.service.GbSpreadsheetService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.slim3.controller.Controller;
@@ -40,6 +40,14 @@ public class DumpController extends Controller {
 		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
+		// Prepare table only at first chain.
+		GbSpreadsheetService spreadsheetService = new GbSpreadsheetService(token);
+		if (cursor == null) {
+			List<GbProperty> properties = GbDatastoreService.getProperties(kind);
+			spreadsheetService.updateWorksheetSize(ssKey, kind, properties.size());
+			spreadsheetService.createTableInWorksheet(ssKey, kind, properties);
+		}
+
 		// Get data from datastore.
 		EntityQuery query = Datastore.query(kind);
 		if (cursor != null) {
@@ -56,27 +64,22 @@ public class DumpController extends Controller {
 		}
 
 		// Re-package.
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (Entity entity : data) {
-			Map<String, Object> map = new HashMap<String, Object>();
-			map.put(Entity.KEY_RESERVED_PROPERTY, entity.getKey().toString());
+			GbEntity gbEntity = new GbEntity();
+			gbEntity.setKey(entity.getKey());
 			Set<String> propNames = entity.getProperties().keySet();
 			for (String propName : propNames) {
-				map.put(propName, entity.getProperty(propName));
+				GbProperty gbProperty = new GbProperty();
+				gbProperty.setName(propName);
+				gbProperty.setValue(entity.getProperty(propName));
+				gbEntity.addProperty(gbProperty);
 			}
-			list.add(map);
-		}
-
-		// Prepare table only at first chain.
-		GbSpreadsheetService service = new GbSpreadsheetService(token);
-		if (cursor == null) {
-			Map<String, Object> properties = GbDatastoreService.getProperties(kind);
-			service.updateWorksheetSize(ssKey, kind, properties.size());
-			service.createTableInWorksheet(ssKey, kind, properties);
+			list.add(gbEntity);
 		}
 
 		// Add to Spreadsheet.
-		service.dumpData(ssKey, kind, tableId, list);
+		spreadsheetService.dumpData(ssKey, kind, tableId, list);
 
 		// Update the control table.
 		Key childKey = Datastore.createKey(controlId, Control.class, kind);
