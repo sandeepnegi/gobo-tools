@@ -19,7 +19,6 @@ import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
-
 public class StartController extends Controller {
 
 	@Override
@@ -46,24 +45,19 @@ public class StartController extends Controller {
 				control.setKey(childKey);
 				control.setKindName(kinds[i]);
 				control.setCount(0);
+				control.setAuthSubToken(token);
+				control.setSsKey(ssKey);
+				control.setTableId(String.valueOf(i));
 				control.setDate(new Date());
 				list.add(control);
+
+				// Call the "task chain" for each kind
+				Queue queue = QueueFactory.getDefaultQueue();
+				queue.add(tx, TaskOptions.Builder.url("/tasks/dump").param(
+					"controlKey",
+					Datastore.keyToString(childKey)).method(Method.GET));
 			}
 			Datastore.put(tx, list);
-
-			// Call the "task chain" for each kind
-			for (int i = 0; i < kinds.length; i++) {
-				Queue queue = QueueFactory.getDefaultQueue();
-				queue.add(tx, TaskOptions.Builder
-					.url("/tasks/dump")
-					.param("token", token)
-					.param("controlId", Datastore.keyToString(controlId))
-					.param("ssKey", ssKey)
-					.param("kind", kinds[i])
-					.param("tableId", String.valueOf(i))
-					.param("rowNum", "0")
-					.method(Method.GET));
-			}
 			Datastore.commit(tx);
 
 		} catch (Exception e) {

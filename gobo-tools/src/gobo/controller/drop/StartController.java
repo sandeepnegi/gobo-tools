@@ -10,12 +10,15 @@ import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
 import org.slim3.datastore.Datastore;
 
+import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 
 public class StartController extends Controller {
 
@@ -23,6 +26,8 @@ public class StartController extends Controller {
 	protected Navigation run() throws Exception {
 
 		final String[] kinds = request.getParameterValues("kindArray");
+		final UserService user = UserServiceFactory.getUserService();
+		final String reportTo = user.getCurrentUser().getEmail();
 
 		Transaction tx = null;
 		try {
@@ -37,21 +42,17 @@ public class StartController extends Controller {
 				control.setKey(childKey);
 				control.setKindName(kinds[i]);
 				control.setCount(0);
+				control.setReportTo(new Email(reportTo));
 				control.setDate(new Date());
 				list.add(control);
+
+				// Call the "task chain" for each kind
+				Queue queue = QueueFactory.getDefaultQueue();
+				queue.add(tx, TaskOptions.Builder.url("/tasks/drop").param(
+					"controlKey",
+					Datastore.keyToString(childKey)).method(Method.GET));
 			}
 			Datastore.put(tx, list);
-
-			// Call the "task chain" for each kind
-			for (int i = 0; i < kinds.length; i++) {
-				Queue queue = QueueFactory.getDefaultQueue();
-				queue.add(tx, TaskOptions.Builder
-					.url("/tasks/drop")
-					.param("controlId", Datastore.keyToString(controlId))
-					.param("kind", kinds[i])
-					.param("rowNum", "0")
-					.method(Method.GET));
-			}
 			Datastore.commit(tx);
 
 		} catch (Exception e) {

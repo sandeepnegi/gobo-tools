@@ -2,6 +2,7 @@ package gobo.controller.tasks;
 
 import gobo.dto.GbEntity;
 import gobo.dto.GbProperty;
+import gobo.meta.GbControlMeta;
 import gobo.model.GbControl;
 import gobo.service.GbDatastoreService;
 import gobo.service.GbSpreadsheetService;
@@ -31,13 +32,14 @@ public class DumpController extends Controller {
 	@Override
 	protected Navigation run() throws Exception {
 
-		final Key controlId = asKey("controlId");
-		final String ssKey = asString("ssKey");
-		final String kind = asString("kind");
-		final String tableId = asString("tableId");
-		final String cursor = asString("cursor");
-		final Integer rowNum = asInteger("rowNum");
-		final String token = asString("token");
+		final Key controlKey = asKey("controlKey");
+		GbControl gbControl = Datastore.get(new GbControlMeta(), controlKey);
+		final String ssKey = gbControl.getSsKey();
+		final String kind = gbControl.getKindName();
+		final String tableId = gbControl.getTableId();
+		final String cursor = gbControl.getCursor();
+		final Integer rowNum = gbControl.getCount();
+		final String token = gbControl.getAuthSubToken();
 		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
@@ -59,8 +61,8 @@ public class DumpController extends Controller {
 		// Call the last chain.
 		if ((data == null) || (data.size() == 0)) {
 			queue.add(TaskOptions.Builder.url("/tasks/dumpEnd").param(
-				"controlId",
-				Datastore.keyToString(controlId)).param("kind", kind).method(Method.GET));
+				"controlKey",
+				Datastore.keyToString(controlKey)).method(Method.GET));
 			return null;
 		}
 
@@ -83,24 +85,15 @@ public class DumpController extends Controller {
 		spreadsheetService.dumpData(ssKey, kind, tableId, list);
 
 		// Update the control table.
-		Key childKey = Datastore.createKey(controlId, GbControl.class, kind);
-		GbControl control = Datastore.get(GbControl.class, childKey);
-		control.setCount(rowNum);
-		control.setDate(new Date());
-		Datastore.put(control);
+		gbControl.setCursor(data.getCursor().toWebSafeString());
+		gbControl.setCount(rowNum + RANGE);
+		gbControl.setDate(new Date());
+		Datastore.put(gbControl);
 
 		// Call the next chain.
-		final String nextRuwNum = String.valueOf(rowNum + RANGE);
-		queue.add(TaskOptions.Builder
-			.url("/tasks/dump")
-			.param("token", token)
-			.param("controlId", Datastore.keyToString(controlId))
-			.param("ssKey", ssKey)
-			.param("kind", kind)
-			.param("tableId", tableId)
-			.param("rowNum", nextRuwNum)
-			.param("cursor", data.getCursor().toWebSafeString())
-			.method(Method.GET));
+		queue.add(TaskOptions.Builder.url("/tasks/dump").param(
+			"controlKey",
+			Datastore.keyToString(controlKey)).method(Method.GET));
 
 		return null;
 	}

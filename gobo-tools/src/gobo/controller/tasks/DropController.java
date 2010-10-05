@@ -1,5 +1,6 @@
 package gobo.controller.tasks;
 
+import gobo.meta.GbControlMeta;
 import gobo.model.GbControl;
 
 import java.util.Date;
@@ -22,17 +23,18 @@ public class DropController extends Controller {
 	@Override
 	protected Navigation run() throws Exception {
 
-		final Key controlId = asKey("controlId");
-		final String kind = asString("kind");
-		final Integer rowNum = asInteger("rowNum");
+		final Key controlKey = asKey("controlKey");
+		GbControl control = Datastore.get(new GbControlMeta(), controlKey);
+		final String kind = control.getKindName();
+		final Integer rowNum = control.getCount();
 		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
 		List<Key> keyList = Datastore.query(kind).limit(RANGE).asKeyList();
 		if ((keyList == null) || (keyList.size() == 0)) {
 			queue.add(TaskOptions.Builder.url("/tasks/dropEnd").param(
-				"controlId",
-				Datastore.keyToString(controlId)).param("kind", kind).method(Method.GET));
+				"controlKey",
+				Datastore.keyToString(controlKey)).method(Method.GET));
 			return null;
 		}
 
@@ -40,20 +42,14 @@ public class DropController extends Controller {
 		Datastore.delete(keyList);
 
 		// Update the control table.
-		Key childKey = Datastore.createKey(controlId, GbControl.class, kind);
-		GbControl control = Datastore.get(GbControl.class, childKey);
-		control.setCount(rowNum);
+		control.setCount(rowNum + RANGE);
 		control.setDate(new Date());
 		Datastore.put(control);
 
 		// Call the next chain.
-		final String nextRuwNum = String.valueOf(rowNum + RANGE);
-		queue.add(TaskOptions.Builder
-			.url("/tasks/drop")
-			.param("controlId", Datastore.keyToString(controlId))
-			.param("kind", kind)
-			.param("rowNum", nextRuwNum)
-			.method(Method.GET));
+		queue.add(TaskOptions.Builder.url("/tasks/drop").param(
+			"controlKey",
+			Datastore.keyToString(controlKey)).method(Method.GET));
 
 		return null;
 	}
