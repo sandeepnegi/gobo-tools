@@ -18,7 +18,7 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
 public class DropController extends Controller {
 
-	final Integer RANGE = 5;
+	final Integer RANGE = 100;
 
 	@Override
 	protected Navigation run() throws Exception {
@@ -27,7 +27,7 @@ public class DropController extends Controller {
 		GbControl control = Datastore.get(new GbControlMeta(), controlKey);
 		final String kind = control.getKindName();
 		final Integer rowNum = control.getCount();
-		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
+		System.out.println("drop kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
 		List<Key> keyList = Datastore.query(kind).limit(RANGE).asKeyList();
