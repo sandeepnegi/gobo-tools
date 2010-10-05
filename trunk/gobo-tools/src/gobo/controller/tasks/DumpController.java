@@ -2,11 +2,12 @@ package gobo.controller.tasks;
 
 import gobo.dto.GbEntity;
 import gobo.dto.GbProperty;
-import gobo.model.Control;
+import gobo.model.GbControl;
 import gobo.service.GbDatastoreService;
 import gobo.service.GbSpreadsheetService;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -82,9 +83,10 @@ public class DumpController extends Controller {
 		spreadsheetService.dumpData(ssKey, kind, tableId, list);
 
 		// Update the control table.
-		Key childKey = Datastore.createKey(controlId, Control.class, kind);
-		Control control = Datastore.get(Control.class, childKey);
+		Key childKey = Datastore.createKey(controlId, GbControl.class, kind);
+		GbControl control = Datastore.get(GbControl.class, childKey);
 		control.setCount(rowNum);
+		control.setDate(new Date());
 		Datastore.put(control);
 
 		// Call the next chain.

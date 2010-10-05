@@ -8,8 +8,8 @@ import org.slim3.datastore.Model;
 
 import com.google.appengine.api.datastore.Key;
 
-@Model(kind = "CONTROL")
-public class Control implements Serializable {
+@Model(kind = "GOBO_CONTROL")
+public class GbControl implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -20,7 +20,7 @@ public class Control implements Serializable {
     private Long version = 0L;
 
     // ワークシート名
-    private String wsTitle;
+    private String kindName;
 
     // 処理済み行数
     private Integer count;
@@ -50,7 +50,7 @@ public class Control implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        Control other = (Control) obj;
+        GbControl other = (GbControl) obj;
         if (key == null) {
             if (other.key != null) {
                 return false;
@@ -77,17 +77,17 @@ public class Control implements Serializable {
     }
 
 	/**
-	 * @param wsTitle the wsTitle to set
+	 * @param kindName the wsTitle to set
 	 */
-	public void setWsTitle(String wsTitle) {
-		this.wsTitle = wsTitle;
+	public void setKindName(String kindName) {
+		this.kindName = kindName;
 	}
 
 	/**
 	 * @return the wsTitle
 	 */
-	public String getWsTitle() {
-		return wsTitle;
+	public String getKindName() {
+		return kindName;
 	}
 
 	/**
