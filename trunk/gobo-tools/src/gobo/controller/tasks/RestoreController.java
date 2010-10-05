@@ -21,7 +21,7 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
 public class RestoreController extends Controller {
 
-	final Integer RANGE = 5;
+	final Integer RANGE = 100;
 
 	@Override
 	protected Navigation run() throws Exception {
@@ -37,9 +37,9 @@ public class RestoreController extends Controller {
 
 		// Spreadsheetからデータを取得
 		GbSpreadsheetService service = new GbSpreadsheetService(token);
-		List<GbEntity> data2 = service.getDataOrNull(ssKey, kind, rowNum + 1, RANGE);
+		List<GbEntity> data = service.getDataOrNull(ssKey, kind, rowNum + 1, RANGE);
 
-		if (data2 == null) {
+		if (data == null) {
 			// Call the final task
 			queue.add(TaskOptions.Builder.url("/tasks/restoreEnd").param(
 				"controlKey",
@@ -49,7 +49,7 @@ public class RestoreController extends Controller {
 
 		// Restoring to Datastore.
 		GbDatastoreService datastoreUtil = new GbDatastoreService();
-		datastoreUtil.restoreData(kind, data2);
+		datastoreUtil.restoreData(kind, data);
 
 		// Update control row.
 		gbControl.setCount(rowNum + RANGE);

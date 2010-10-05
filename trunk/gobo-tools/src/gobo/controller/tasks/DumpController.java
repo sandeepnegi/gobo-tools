@@ -27,7 +27,7 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
 public class DumpController extends Controller {
 
-	final Integer RANGE = 5;
+	final Integer RANGE = 100;
 
 	@Override
 	protected Navigation run() throws Exception {
@@ -42,6 +42,8 @@ public class DumpController extends Controller {
 		final String token = gbControl.getAuthSubToken();
 		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
+		// final String retryCount =
+		// request.getHeader("X-AppEngine-TaskRetryCount");
 
 		// Prepare table only at first chain.
 		GbSpreadsheetService spreadsheetService = new GbSpreadsheetService(token);
