@@ -1,7 +1,8 @@
 package gobo.controller.tasks;
 
-import gobo.model.Control;
+import gobo.model.GbControl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.slim3.controller.Controller;
@@ -39,9 +40,10 @@ public class DropController extends Controller {
 		Datastore.delete(keyList);
 
 		// Update the control table.
-		Key childKey = Datastore.createKey(controlId, Control.class, kind);
-		Control control = Datastore.get(Control.class, childKey);
+		Key childKey = Datastore.createKey(controlId, GbControl.class, kind);
+		GbControl control = Datastore.get(GbControl.class, childKey);
 		control.setCount(rowNum);
+		control.setDate(new Date());
 		Datastore.put(control);
 
 		// Call the next chain.

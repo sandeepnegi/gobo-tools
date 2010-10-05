@@ -1,8 +1,9 @@
 package gobo.controller.restore;
 
-import gobo.model.Control;
+import gobo.model.GbControl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.slim3.controller.Controller;
@@ -33,12 +34,14 @@ public class StartController extends Controller {
 
 			// コントロールテーブルを準備
 			Key controlId = Datastore.allocateId("restore");
-			List<Control> list = new ArrayList<Control>();
+			List<GbControl> list = new ArrayList<GbControl>();
 			for (int i = 0; i < wsTitles.length; i++) {
-				Control control = new Control();
-				Key childKey = Datastore.createKey(controlId, Control.class, wsTitles[i]);
+				GbControl control = new GbControl();
+				Key childKey = Datastore.createKey(controlId, GbControl.class, wsTitles[i]);
 				control.setKey(childKey);
+				control.setKindName(wsTitles[i]);
 				control.setCount(0);
+				control.setDate(new Date());
 				list.add(control);
 			}
 			Datastore.put(tx, list);
@@ -51,7 +54,7 @@ public class StartController extends Controller {
 					.param("token", token)
 					.param("controlId", Datastore.keyToString(controlId))
 					.param("ssKey", ssKey)
-					.param("wsTitle", wsTitles[i])
+					.param("kind", wsTitles[i])
 					.param("rowNum", "2")
 					.method(Method.GET));
 			}

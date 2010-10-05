@@ -1,6 +1,6 @@
 package gobo.controller.tasks;
 
-import gobo.model.Control;
+import gobo.model.GbControl;
 import gobo.service.GbMailService;
 
 import java.util.List;
@@ -20,10 +20,10 @@ public class DumpEndController extends Controller {
 		final String kind = asString("kind");
 
 		// Delete control row.
-		Key childKey = Datastore.createKey(controlId, Control.class, kind);
+		Key childKey = Datastore.createKey(controlId, GbControl.class, kind);
 		Datastore.delete(childKey);
 
-		List<Control> list = Datastore.query(Control.class, controlId).asList();
+		List<GbControl> list = Datastore.query(GbControl.class, controlId).asList();
 		if ((list == null) || (list.size() == 0)) {
 			
 			// Mail

@@ -1,10 +1,11 @@
 package gobo.controller.dump;
 
-import gobo.model.Control;
+import gobo.model.GbControl;
 import gobo.service.GbSpreadsheetService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.slim3.controller.Controller;
@@ -38,12 +39,14 @@ public class StartController extends Controller {
 
 			// Prepare control table.
 			Key controlId = Datastore.allocateId("dump");
-			List<Control> list = new ArrayList<Control>();
+			List<GbControl> list = new ArrayList<GbControl>();
 			for (int i = 0; i < kinds.length; i++) {
-				Control control = new Control();
-				Key childKey = Datastore.createKey(controlId, Control.class, kinds[i]);
+				GbControl control = new GbControl();
+				Key childKey = Datastore.createKey(controlId, GbControl.class, kinds[i]);
 				control.setKey(childKey);
+				control.setKindName(kinds[i]);
 				control.setCount(0);
+				control.setDate(new Date());
 				list.add(control);
 			}
 			Datastore.put(tx, list);

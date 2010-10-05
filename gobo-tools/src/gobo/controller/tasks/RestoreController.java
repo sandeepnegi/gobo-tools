@@ -1,9 +1,10 @@
 package gobo.controller.tasks;
 
+import java.util.Date;
 import java.util.List;
 
 import gobo.dto.GbEntity;
-import gobo.model.Control;
+import gobo.model.GbControl;
 import gobo.service.GbDatastoreService;
 import gobo.service.GbSpreadsheetService;
 
@@ -26,15 +27,15 @@ public class RestoreController extends Controller {
 
 		final Key controlId = asKey("controlId");
 		final String ssKey = asString("ssKey");
-		final String wsTitle = asString("wsTitle");
+		final String kind = asString("kind");
 		final Integer rowNum = asInteger("rowNum");
 		final String token = asString("token");
-		System.out.println("Restoring wsTitle=" + wsTitle + ":rowNum=" + rowNum);
+		System.out.println("Restoring wsTitle=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
 		// Spreadsheetからデータを取得
 		GbSpreadsheetService service = new GbSpreadsheetService(token);
-		List<GbEntity> data2 = service.getDataOrNull(ssKey, wsTitle, rowNum + 1, RANGE);
+		List<GbEntity> data2 = service.getDataOrNull(ssKey, kind, rowNum + 1, RANGE);
 
 		// String[][] data = service.getData(ssKey, wsTitle, rowNum + 1, RANGE);
 		// if (data == null) {
@@ -42,19 +43,20 @@ public class RestoreController extends Controller {
 			// チェーンの最終タスクを呼んで終了
 			queue.add(TaskOptions.Builder.url("/tasks/restoreEnd").param(
 				"controlId",
-				Datastore.keyToString(controlId)).param("wsTitle", wsTitle).method(Method.GET));
+				Datastore.keyToString(controlId)).param("kind", kind).method(Method.GET));
 			return null;
 		}
 
 		// Restoring to Datastore.
 		GbDatastoreService datastoreUtil = new GbDatastoreService();
 		// datastoreUtil.restoreData(wsTitle, data);
-		datastoreUtil.restoreData(wsTitle, data2);
+		datastoreUtil.restoreData(kind, data2);
 
 		// コントロールテーブルを更新
-		Key childKey = Datastore.createKey(controlId, Control.class, wsTitle);
-		Control control = Datastore.get(Control.class, childKey);
+		Key childKey = Datastore.createKey(controlId, GbControl.class, kind);
+		GbControl control = Datastore.get(GbControl.class, childKey);
 		control.setCount(rowNum);
+		control.setDate(new Date());
 		Datastore.put(control);
 
 		// タスクチェーンを継続
@@ -64,7 +66,7 @@ public class RestoreController extends Controller {
 			.param("token", token)
 			.param("controlId", Datastore.keyToString(controlId))
 			.param("ssKey", ssKey)
-			.param("wsTitle", wsTitle)
+			.param("kind", kind)
 			.param("rowNum", nextRuwNum)
 			.method(Method.GET));
 
