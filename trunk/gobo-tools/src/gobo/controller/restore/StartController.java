@@ -17,7 +17,6 @@ import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
-
 public class StartController extends Controller {
 
 	@Override
@@ -40,24 +39,19 @@ public class StartController extends Controller {
 				Key childKey = Datastore.createKey(controlId, GbControl.class, wsTitles[i]);
 				control.setKey(childKey);
 				control.setKindName(wsTitles[i]);
-				control.setCount(0);
+				control.setCount(2); // ignore header!
+				control.setAuthSubToken(token);
+				control.setSsKey(ssKey);
 				control.setDate(new Date());
 				list.add(control);
+
+				// タスクチェーンをワークシートごとにパラレルで起動
+				Queue queue = QueueFactory.getDefaultQueue();
+				queue.add(tx, TaskOptions.Builder.url("/tasks/restore").param(
+					"controlKey",
+					Datastore.keyToString(childKey)).method(Method.GET));
 			}
 			Datastore.put(tx, list);
-
-			// タスクチェーンをワークシートごとにパラレルで起動
-			for (int i = 0; i < wsTitles.length; i++) {
-				Queue queue = QueueFactory.getDefaultQueue();
-				queue.add(tx, TaskOptions.Builder
-					.url("/tasks/restore")
-					.param("token", token)
-					.param("controlId", Datastore.keyToString(controlId))
-					.param("ssKey", ssKey)
-					.param("kind", wsTitles[i])
-					.param("rowNum", "2")
-					.method(Method.GET));
-			}
 			Datastore.commit(tx);
 
 		} catch (Exception e) {

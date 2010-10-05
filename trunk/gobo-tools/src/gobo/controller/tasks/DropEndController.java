@@ -1,5 +1,6 @@
 package gobo.controller.tasks;
 
+import gobo.meta.GbControlMeta;
 import gobo.model.GbControl;
 import gobo.service.GbMailService;
 
@@ -16,19 +17,22 @@ public class DropEndController extends Controller {
 	@Override
 	protected Navigation run() throws Exception {
 
-		final Key controlId = asKey("controlId");
-		final String kind = asString("kind");
+		final Key controlKey = asKey("controlKey");
+		GbControl gbControl = Datastore.get(new GbControlMeta(), controlKey);
 
 		// Delete control row.
-		Key childKey = Datastore.createKey(controlId, GbControl.class, kind);
-		Datastore.delete(childKey);
+		Datastore.delete(controlKey);
 
-		List<GbControl> list = Datastore.query(GbControl.class, controlId).asList();
+		final Key parentKey = controlKey.getParent();
+		List<GbControl> list = Datastore.query(GbControl.class, parentKey).asList();
 		if ((list == null) || (list.size() == 0)) {
 
 			// Mail
-			GbMailService.sendMail(controlId.getId(), "Drop " + kind);
-			System.out.println("終了");
+			final long controlId = parentKey.getId();
+			if (gbControl.getReportTo() != null) {
+				GbMailService.sendMail(gbControl.getReportTo(), controlId, "Drop");
+			}
+			System.out.println("Finished");
 		}
 
 		return null;
