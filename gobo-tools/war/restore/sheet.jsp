@@ -32,7 +32,7 @@ google.setOnLoadCallback(initialize);
 <c:forEach items="${list}" var="row">
 <li>
   <input type="checkbox" name="wsTitleArray" value="${row.wsTitle}" id="title_${row.wsTitle}" />
-  <label for="title_${row.wsTitle}">${row.wsTitle}:${row.rowCount}</label>
+  <label for="title_${row.wsTitle}">${row.wsTitle}&nbsp;/&nbsp;<fmt:formatNumber>${row.rowCount}</fmt:formatNumber> records</label>
 </li>
 </c:forEach>
 </ul>
