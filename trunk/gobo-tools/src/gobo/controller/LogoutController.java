@@ -11,14 +11,14 @@ public class LogoutController extends Controller {
 	protected Navigation run() throws Exception {
 
 		String referer = request.getHeader("Referer");
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-        	session.invalidate();
-        }
-        if (referer == null) {
-        	referer = "/";
-        }
-		return redirect(referer);
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			session.invalidate();
+		}
+		if (referer == null) {
+			referer = "/";
+		}
+		return redirect(referer.substring(0, referer.indexOf('?')));
 	}
 
 }

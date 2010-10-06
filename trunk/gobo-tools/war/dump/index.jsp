@@ -23,6 +23,7 @@ google.setOnLoadCallback(initialize);
 </script>
 </head>
 <body>
+<div style="position:absolute; top:10px; right:10px;"><a href="${f:url("/logout")}">logout</a></div>
 <div>Please select kind(s) to dump.</div>
 <form action="${f:url("start")}" method="POST" id="form1">
 <input type="button" value="Check All" id="checkall" />
