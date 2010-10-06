@@ -8,7 +8,7 @@
 <title></title>
 </head>
 <body>
-スプレッドシート（ブック）一覧
+<div>Please select a spreadsheet to restore.</div>
 <ul>
 <c:forEach items="${list}" var="row">
 <li><a href="${f:url("sheet")}?ssKey=${row.key}">${f:h(row.title)}</a></li>

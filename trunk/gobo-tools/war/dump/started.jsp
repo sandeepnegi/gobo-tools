@@ -9,6 +9,7 @@
 </head>
 <body>
 Started to dump!<br />
+<a href="${f:url(docURL)}" target="_blank">${docURL}</a><br />
 <a href="${f:url("/")}">back</a>
 </body>
 </html>

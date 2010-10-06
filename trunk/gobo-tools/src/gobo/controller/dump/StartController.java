@@ -18,6 +18,7 @@ import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
+import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 
 public class StartController extends Controller {
 
@@ -29,7 +30,8 @@ public class StartController extends Controller {
 
 		// Craete new spreadsheet
 		GbSpreadsheetService su = new GbSpreadsheetService(token);
-		final String ssKey = su.createSpreadsheet(Arrays.asList(kinds));
+		SpreadsheetEntry createSpreadsheet = su.createSpreadsheet(Arrays.asList(kinds));
+		final String ssKey = createSpreadsheet.getKey();
 		System.out.println("ssKey=" + ssKey);
 
 		Transaction tx = null;
@@ -65,7 +67,9 @@ public class StartController extends Controller {
 			throw e;
 		}
 
-		return redirect("started");
+		return redirect("started?docURL="
+			+ response.encodeRedirectURL(createSpreadsheet.getHtmlLink().getHref()));
+		// return redirect(createSpreadsheet.getHtmlLink().getHref());
 	}
 
 }

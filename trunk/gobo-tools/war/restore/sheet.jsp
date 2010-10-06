@@ -6,11 +6,28 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <title></title>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load("jquery", "1.4.2");
+function initialize() {
+	$("#checkall").click(function(){
+		$("#form1 input[type='checkbox']").attr('checked', true);
+        return false; 
+	});
+	$("#uncheckall").click(function(){
+		$("#form1 input[type='checkbox']").attr('checked', false);
+        return false; 
+	});
+}
+google.setOnLoadCallback(initialize);
+</script>
 </head>
 <body>
-ワークシート一覧
-<form action="${f:url("start")}" method="POST">
+<div>Prease select worksheet(s) to restore.</div>
+<form action="${f:url("start")}" method="POST" id="form1">
 <input type="hidden" name="ssKey" value="${ssKey}" />
+<input type="button" value="Check All" id="checkall" />
+<input type="button" value="Uncheck All" id="uncheckall" />
 <ul>
 <c:forEach items="${list}" var="row">
 <li>
@@ -19,7 +36,7 @@
 </li>
 </c:forEach>
 </ul>
-<input type="submit" value="実行" />
+<input type="submit" value="execute" />
 </form>
 </body>
 </html>
