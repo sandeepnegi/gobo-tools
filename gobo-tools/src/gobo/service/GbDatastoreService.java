@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.slim3.datastore.Datastore;
+import org.slim3.datastore.DatastoreUtil;
 import org.slim3.util.AppEngineUtil;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -17,6 +18,9 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.apphosting.api.DatastorePb.Schema;
+import com.google.storage.onestore.v3.OnestoreEntity.EntityProto;
+import com.google.storage.onestore.v3.OnestoreEntity.Property;
 
 public class GbDatastoreService {
 
@@ -42,13 +46,32 @@ public class GbDatastoreService {
 
 	public static List<GbProperty> getProperties(String kind) {
 
-		Entity entity = Datastore.query(kind).limit(1).asList().get(0);
-		Map<String, Object> properties = entity.getProperties();
+		// Entity entity = Datastore.query(kind).limit(1).asList().get(0);
+		// Map<String, Object> properties = entity.getProperties();
+		// List<GbProperty> list = new ArrayList<GbProperty>();
+		// for (String name : properties.keySet()) {
+		// GbProperty gbProperty = new GbProperty();
+		// gbProperty.setName(name);
+		// gbProperty.setValue(properties.get(name));
+		// list.add(gbProperty);
+		// }
+		// return list;
+
 		List<GbProperty> list = new ArrayList<GbProperty>();
-		for (String name : properties.keySet()) {
+		Schema schema = DatastoreUtil.getSchema();
+		List<EntityProto> entityProtoList = schema.kinds();
+		EntityProto targetEntity = null;
+		for (EntityProto entityProto : entityProtoList) {
+			String kindName = DatastoreUtil.getKind(entityProto.getKey());
+			if (kind.equals(kindName)) {
+				targetEntity = entityProto;
+				break;
+			}
+		}
+		List<Property> propertys = targetEntity.propertys();
+		for (Property property : propertys) {
 			GbProperty gbProperty = new GbProperty();
-			gbProperty.setName(name);
-			gbProperty.setValue(properties.get(name));
+			gbProperty.setName(property.getName());
 			list.add(gbProperty);
 		}
 		return list;
