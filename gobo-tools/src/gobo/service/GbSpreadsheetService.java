@@ -186,14 +186,14 @@ public class GbSpreadsheetService {
 	 * @return
 	 * @throws Exception
 	 */
-	public String createSpreadsheet(List<String> targetKinds) throws Exception {
+	public SpreadsheetEntry createSpreadsheet(List<String> targetKinds) throws Exception {
 
 		// Create "docs".SpreadsheetEntry
 		final String appId = ApiProxy.getCurrentEnvironment().getAppId();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		final String fileName = appId + "_" + sdf.format(new Date());
 		System.out.println("created new file:" + fileName);
-		DocumentListEntry entry = new com.google.gdata.data.docs.SpreadsheetEntry();
+		DocumentListEntry entry = new com.google.gdata.data.docs.SpreadsheetEntry();		
 		entry.setTitle(new PlainTextConstruct(fileName));
 		DocumentListEntry newSpreadSheet =
 			cs.insert(new URL("https://docs.google.com/feeds/default/private/full/"), entry);
@@ -225,7 +225,7 @@ public class GbSpreadsheetService {
 				ss.insert(worksheetFeedUrl, newWorksheet);
 			}
 
-			return spreadsheetEntry.getKey();
+			return spreadsheetEntry;
 
 		} catch (Exception e) {
 			if (newSpreadSheet != null) {

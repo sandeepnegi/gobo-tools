@@ -2,12 +2,8 @@ package gobo.controller.tmp;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
@@ -35,6 +31,8 @@ import com.google.appengine.api.users.User;
 
 public class Testdata1Controller extends Controller {
 
+	private static final int BATCH_PUT_SIZE = 100;
+
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Navigation run() throws Exception {
@@ -43,13 +41,13 @@ public class Testdata1Controller extends Controller {
 		if (count == null) {
 			count = 0;
 		}
-		if (count >= 100) {
-			return null;
-		}
 
 		Integer max = asInteger("max");
 		if (max == null) {
-			max = 100;
+			max = 1000;
+		}
+		if ((count * BATCH_PUT_SIZE) >= max) {
+			return null;
 		}
 
 		String kind = asString("kind");
@@ -59,65 +57,57 @@ public class Testdata1Controller extends Controller {
 
 		List list = new ArrayList();
 		List keyList = new ArrayList();
-		for (int i = 0; i < max; i++) {
+		for (int i = 0; i < BATCH_PUT_SIZE; i++) {
 
 			Entity entity = new Entity(kind);
-			entity.setProperty("String", RandomStringUtils.randomAlphabetic(10));
-			entity.setProperty("Integer", new Integer(RandomUtils.nextInt()));
-			entity.setProperty("Short", new Short(RandomStringUtils.randomNumeric(1)));
-			entity.setProperty("Long", new Long(RandomUtils.nextLong()));
-			entity.setProperty("Boolean", new Boolean(RandomUtils.nextBoolean()));
-			entity.setProperty("Float", new Float(RandomUtils.nextFloat()));
-			entity.setProperty("Double", new Double(RandomUtils.nextDouble()));
-			entity.setProperty("Date", new Date(RandomUtils.nextLong()));
-			entity.setProperty("User", new User("test@example", "google.com"));
-			entity.setProperty("Key", Datastore.createKey("test", RandomStringUtils
+			entity.setProperty("prop01", RandomStringUtils.randomAlphabetic(10));
+			entity.setProperty("prop02", new Integer(RandomUtils.nextInt()));
+			entity.setProperty("prop03", new Short(RandomStringUtils.randomNumeric(1)));
+			entity.setProperty("prop04", new Long(RandomUtils.nextLong()));
+			entity.setProperty("prop05", new Boolean(RandomUtils.nextBoolean()));
+			entity.setProperty("prop06", new Float(RandomUtils.nextFloat()));
+			entity.setProperty("prop07", new Double(RandomUtils.nextDouble()));
+			entity.setProperty("prop08", new Date(RandomUtils.nextLong()));
+			entity.setProperty("prop09", new User("test@example", "google.com"));
+			entity.setProperty("prop10", Datastore.createKey("test", RandomStringUtils
 				.randomAlphabetic(5)));
-			entity.setProperty("Category", new Category(RandomStringUtils.randomAlphabetic(3)));
-			entity.setProperty("Email", new Email("test@example"));
-			entity.setProperty("GeoPt", new GeoPt(new Float(new Integer(RandomStringUtils
+			entity.setProperty("prop11", new Category(RandomStringUtils.randomAlphabetic(3)));
+			entity.setProperty("prop12", new Email("test@example"));
+			entity.setProperty("prop13", new GeoPt(new Float(new Integer(RandomStringUtils
 				.randomNumeric(2)) - 9), new Float(
 				new Integer(RandomStringUtils.randomNumeric(2)) - 9)));
-			entity.setProperty("IMHandle", new IMHandle(Scheme.valueOf("sip"), RandomStringUtils
+			entity.setProperty("prop14", new IMHandle(Scheme.valueOf("sip"), RandomStringUtils
 				.randomAlphabetic(2)));
-			entity.setProperty("Link", new Link("test"));
-			entity.setProperty("PhoneNumber", new PhoneNumber(RandomStringUtils.randomNumeric(11)));
-			entity.setProperty("PostalAddress", new PostalAddress(RandomStringUtils
+			entity.setProperty("prop15", new Link("test"));
+			entity.setProperty("prop16", new PhoneNumber(RandomStringUtils.randomNumeric(11)));
+			entity.setProperty("prop17", new PostalAddress(RandomStringUtils
 				.randomNumeric(7)));
-			entity.setProperty("Rating", new Rating(Integer.parseInt(RandomStringUtils
+			entity.setProperty("prop18", new Rating(Integer.parseInt(RandomStringUtils
 				.randomNumeric(2))));
 
 			List<String> coll = new ArrayList<String>();
 			coll.add(RandomStringUtils.randomAlphabetic(3));
 			coll.add(RandomStringUtils.randomAlphabetic(3));
 			coll.add(RandomStringUtils.randomAlphabetic(3));
-			entity.setProperty("List", coll);
+			entity.setProperty("prop19", coll);
 
-			Set<String> coll2 = new HashSet<String>();
-			coll2.add(RandomStringUtils.randomAlphanumeric(3));
-			coll2.add(RandomStringUtils.randomAlphanumeric(3));
-			coll2.add(RandomStringUtils.randomAlphanumeric(3));
-			entity.setProperty("Set", coll2);
-
-			SortedSet<Integer> coll3 = new TreeSet<Integer>();
-			coll3.add(new Integer(RandomStringUtils.randomNumeric(5)));
-			coll3.add(new Integer(RandomStringUtils.randomNumeric(5)));
-			coll3.add(new Integer(RandomStringUtils.randomNumeric(5)));
-			entity.setProperty("SortedSet", coll3);
+			List<Integer> coll2 = new ArrayList<Integer>();
+			coll2.add(new Integer(RandomStringUtils.randomNumeric(5)));
+			coll2.add(new Integer(RandomStringUtils.randomNumeric(5)));
+			coll2.add(new Integer(RandomStringUtils.randomNumeric(5)));
+			entity.setProperty("prop20", coll2);
 
 			// Make Null Property
-			//if (i != 0) {
-				if (keyList.size() == 0) {
-					Iterator<String> iterator = entity.getProperties().keySet().iterator();
-					while (iterator.hasNext()) {
-						String key = iterator.next();
-						keyList.add(key);
-					}
+			if (keyList.size() == 0) {
+				Iterator<String> iterator = entity.getProperties().keySet().iterator();
+				while (iterator.hasNext()) {
+					String key = iterator.next();
+					keyList.add(key);
 				}
-				int index = RandomUtils.nextInt(keyList.size());
-				entity.removeProperty((String) keyList.get(index));
-			//}
-			
+			}
+			int index = RandomUtils.nextInt(keyList.size());
+			entity.removeProperty((String) keyList.get(index));
+
 			list.add(entity);
 
 		}
