@@ -116,6 +116,7 @@
         </auth-constraint>
     </security-constraint>
 
+<!-- 
     <security-constraint>
         <web-resource-collection>
             <url-pattern>/*</url-pattern>
@@ -124,5 +125,5 @@
             <role-name>admin</role-name>
         </auth-constraint>
     </security-constraint>
-
+ -->
 </web-app>
