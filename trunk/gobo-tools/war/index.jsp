@@ -7,17 +7,28 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <title></title>
+<style>
+.button a {
+font-size:100px;
+display: block;
+background: #fff;
+color: #0000ff;
+text-decoration: none;
+padding: 50px;
+}
+.button a:hover {
+color: #ff0000;
+background: #ddd;
+}
+</style>
 </head>
 <link rel="stylesheet" href="css/global.css" />
 <body>
 <h1>Gobo Tools</h1>
 <div style="text-align:center;">
-  <div><a href="dump/"><img src="images/dump.png" /></a></div>
-  <h2>Dump</h2>
-  <div><a href="restore/"><img src="images/restore.png" /></a></div>
-  <h2>Restore</h2>
-  <div><a href="drop/">Drop</a></div>
-  <h2>Drop</h2>
+  <div class="button"><a href="${f:url("/dump/")}"/>Dump</a></div>
+  <div class="button"><a href="${f:url("/restore/")}"/>Restore</a></div>
+  <div class="button"><a href="${f:url("/drop/")}"/>Drop</a></div>
 </div>
 </body>
 </html>
