@@ -30,6 +30,5 @@ background: #ddd;
   <div class="button"><a href="${f:url("/restore/")}"/>Restore</a></div>
   <div class="button"><a href="${f:url("/drop/")}"/>Drop</a></div>
 </div>
-<div style="position:absolute; top:10px; right:10px;"><a href="${f:url("/logout")}">logout</a></div>
 </body>
 </html>
