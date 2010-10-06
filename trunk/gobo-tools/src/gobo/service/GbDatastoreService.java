@@ -35,7 +35,7 @@ public class GbDatastoreService {
 			kinds = new ArrayList<String>();
 			for (Entity kind : list) {
 				String kindName = (String) kind.getProperty("kind_name");
-				if ((kindName.startsWith("__") == false)
+				if ((kindName.startsWith("_") == false)
 					&& (kindName.equals(GbControlMeta.get().getKind()) == false)) {
 					kinds.add(kindName);
 				}
@@ -49,33 +49,40 @@ public class GbDatastoreService {
 
 	public static List<GbProperty> getProperties(String kind) {
 
-		// Entity entity = Datastore.query(kind).limit(1).asList().get(0);
-		// Map<String, Object> properties = entity.getProperties();
-		// List<GbProperty> list = new ArrayList<GbProperty>();
-		// for (String name : properties.keySet()) {
-		// GbProperty gbProperty = new GbProperty();
-		// gbProperty.setName(name);
-		// gbProperty.setValue(properties.get(name));
-		// list.add(gbProperty);
-		// }
-		// return list;
-
 		List<GbProperty> list = new ArrayList<GbProperty>();
-		Schema schema = DatastoreUtil.getSchema();
-		List<EntityProto> entityProtoList = schema.kinds();
-		EntityProto targetEntity = null;
-		for (EntityProto entityProto : entityProtoList) {
-			String kindName = DatastoreUtil.getKind(entityProto.getKey());
-			if (kind.equals(kindName)) {
-				targetEntity = entityProto;
-				break;
+		if (AppEngineUtil.isProduction()) {
+
+			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+			List<Entity> _list =
+				datastore.prepare(new Query("__Stat_PropertyType_PropertyName_Kind__")).asList(
+					FetchOptions.Builder.withOffset(0));
+			for (Entity _kind : _list) {
+				//System.out.println(_kind);
+				if (_kind.getProperty("kind_name").equals(kind)) {
+					GbProperty gbProperty = new GbProperty();
+					gbProperty.setName((String) _kind.getProperty("property_name"));
+					list.add(gbProperty);
+				}
 			}
-		}
-		List<Property> propertys = targetEntity.propertys();
-		for (Property property : propertys) {
-			GbProperty gbProperty = new GbProperty();
-			gbProperty.setName(property.getName());
-			list.add(gbProperty);
+
+		} else {
+
+			Schema schema = DatastoreUtil.getSchema();
+			List<EntityProto> entityProtoList = schema.kinds();
+			EntityProto targetEntity = null;
+			for (EntityProto entityProto : entityProtoList) {
+				String kindName = DatastoreUtil.getKind(entityProto.getKey());
+				if (kind.equals(kindName)) {
+					targetEntity = entityProto;
+					break;
+				}
+			}
+			List<Property> propertys = targetEntity.propertys();
+			for (Property property : propertys) {
+				GbProperty gbProperty = new GbProperty();
+				gbProperty.setName(property.getName());
+				list.add(gbProperty);
+			}
 		}
 		return list;
 	}

@@ -16,7 +16,7 @@ public class GbMailService {
 		Message message1 = new Message();
 		message1.setTo(email.getEmail());
 		message1.setSubject("[" + controlId + "]" + task + " Ended");
-		message1.setSender("gobo@" + ApiProxy.getCurrentEnvironment().getAppId() + ".appspot.com");
+		message1.setSender("gobo-tools@" + ApiProxy.getCurrentEnvironment().getAppId() + ".appspotmail.com");
 		message1.setTextBody("[" + controlId + "]" + task + " Ended.");
 		try {
 			mailService.send(message1);
