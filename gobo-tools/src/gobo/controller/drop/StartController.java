@@ -17,6 +17,7 @@ import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
@@ -27,7 +28,7 @@ public class StartController extends Controller {
 
 		final String[] kinds = request.getParameterValues("kindArray");
 		final UserService user = UserServiceFactory.getUserService();
-		final String reportTo = user.getCurrentUser().getEmail();
+		final User currentUser = user.getCurrentUser();
 
 		Transaction tx = null;
 		try {
@@ -42,7 +43,9 @@ public class StartController extends Controller {
 				control.setKey(childKey);
 				control.setKindName(kinds[i]);
 				control.setCount(0);
-				control.setReportTo(new Email(reportTo));
+				if (currentUser != null) {
+					control.setReportTo(new Email(currentUser.getEmail()));
+				}
 				control.setDate(new Date());
 				list.add(control);
 

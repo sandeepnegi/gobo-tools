@@ -10,12 +10,16 @@ import org.slim3.controller.Controller;
 import org.slim3.controller.Navigation;
 import org.slim3.datastore.Datastore;
 
+import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 
 public class StartController extends Controller {
 
@@ -25,6 +29,8 @@ public class StartController extends Controller {
 		final String ssKey = asString("ssKey");
 		final String[] wsTitles = request.getParameterValues("wsTitleArray");
 		final String token = sessionScope("token");
+		final UserService user = UserServiceFactory.getUserService();
+		final User currentUser = user.getCurrentUser();
 
 		// コントロールテーブルを用意
 		Transaction tx = null;
@@ -40,6 +46,9 @@ public class StartController extends Controller {
 				control.setKey(childKey);
 				control.setKindName(wsTitles[i]);
 				control.setCount(2); // ignore header!
+				if (currentUser != null) {
+					control.setReportTo(new Email(currentUser.getEmail()));
+				}
 				control.setAuthSubToken(token);
 				control.setSsKey(ssKey);
 				control.setDate(new Date());
