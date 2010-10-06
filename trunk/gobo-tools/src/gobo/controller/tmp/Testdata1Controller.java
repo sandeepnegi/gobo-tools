@@ -106,7 +106,7 @@ public class Testdata1Controller extends Controller {
 			entity.setProperty("SortedSet", coll3);
 
 			// Make Null Property
-			if (i != 0) {
+			//if (i != 0) {
 				if (keyList.size() == 0) {
 					Iterator<String> iterator = entity.getProperties().keySet().iterator();
 					while (iterator.hasNext()) {
@@ -116,7 +116,7 @@ public class Testdata1Controller extends Controller {
 				}
 				int index = RandomUtils.nextInt(keyList.size());
 				entity.removeProperty((String) keyList.get(index));
-			}
+			//}
 			
 			list.add(entity);
 

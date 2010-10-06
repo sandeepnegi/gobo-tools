@@ -17,6 +17,7 @@ import com.google.apphosting.api.ApiProxy;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.client.spreadsheet.CellQuery;
 import com.google.gdata.client.spreadsheet.FeedURLFactory;
+import com.google.gdata.client.spreadsheet.RecordQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.client.spreadsheet.WorksheetQuery;
@@ -29,6 +30,7 @@ import com.google.gdata.data.spreadsheet.Data;
 import com.google.gdata.data.spreadsheet.Field;
 import com.google.gdata.data.spreadsheet.Header;
 import com.google.gdata.data.spreadsheet.RecordEntry;
+import com.google.gdata.data.spreadsheet.RecordFeed;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.data.spreadsheet.TableEntry;
@@ -41,6 +43,8 @@ import com.google.gdata.util.ServiceException;
 
 public class GbSpreadsheetService {
 
+	private static final String VALUE_TYPE = "TYPE";
+	private static final String VALUE_TYPE_NOT_SET = "*";
 	private String authSubToken;
 	private SpreadsheetService ss;
 	private DocsService cs;
@@ -288,7 +292,7 @@ public class GbSpreadsheetService {
 		FeedURLFactory factory = FeedURLFactory.getDefault();
 		URL tableFeedUrl = factory.getTableFeedUrl(ssKey);
 
-		// if already exists, delete first
+		// Check if already exists.
 		TableEntry tableEntry = null;
 		TableFeed feed = ss.getFeed(tableFeedUrl, TableFeed.class);
 		for (TableEntry entry : feed.getEntries()) {
@@ -321,22 +325,23 @@ public class GbSpreadsheetService {
 			tableEntry = ss.insert(tableFeedUrl, tableEntry);
 		}
 
-		// Add a "valueType" row
+		// Add a "valueType" row (as "*" to be replaced)
 		int numberOfRows = tableEntry.getData().getNumberOfRows();
 		if (numberOfRows == 0) {
-			String[] split = tableEntry.getId().split("/");
-			final String tableId = split[split.length - 1];
-			URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
 			RecordEntry newEntry = new RecordEntry();
+			newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, VALUE_TYPE));
 			for (int i = 0; i < properties.size(); i++) {
 				GbProperty gbProperty = properties.get(i);
 				String columnName = gbProperty.getName();
-				String type = gbProperty.asSpreadsheetValueType();
-				newEntry.addField(new Field(null, columnName, type));
+				// String type = gbProperty.asSpreadsheetValueType();
+				// newEntry.addField(new Field(null, columnName, type));
+				newEntry.addField(new Field(null, columnName, VALUE_TYPE_NOT_SET));
 			}
+			String[] split = tableEntry.getId().split("/");
+			final String tableId = split[split.length - 1];
+			URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
 			ss.insert(recordFeedUrl, newEntry);
 		}
-
 	}
 
 	/**
@@ -351,9 +356,23 @@ public class GbSpreadsheetService {
 	public void dumpData(String ssKey, String kind, String tableId, List<GbEntity> list)
 			throws IOException, ServiceException {
 
-		// Adding new rows to table
 		FeedURLFactory factory = FeedURLFactory.getDefault();
 		URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
+
+		// Get "valueType" row for update.
+		RecordQuery query = new RecordQuery(recordFeedUrl);
+		query.setSpreadsheetQuery(Entity.KEY_RESERVED_PROPERTY + "=" + VALUE_TYPE);
+		RecordEntry valueTypeRow = ss.query(query, RecordFeed.class).getEntries().get(0);
+		Map<String, Field> valueTypeRowMap = new HashMap<String, Field>();
+		boolean valueTypeNotSet = false;
+		for (Field field : valueTypeRow.getFields()) {
+			valueTypeRowMap.put(field.getName(), field);
+			if (field.getValue().equals(VALUE_TYPE_NOT_SET)) {
+				valueTypeNotSet = true;
+			}
+		}
+
+		// Adding new rows to table
 		for (GbEntity gbEntity : list) {
 			RecordEntry newEntry = new RecordEntry();
 			newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, gbEntity
@@ -363,9 +382,20 @@ public class GbSpreadsheetService {
 				String value = gbProperty.asSpreadsheetValue();
 				if (value != null) {
 					newEntry.addField(new Field(null, gbProperty.getName(), value));
+
+					// Update valueType Cell
+					if (valueTypeNotSet) {
+						Field valueTypeCell = valueTypeRowMap.get(gbProperty.getName());
+						valueTypeCell.setValue(gbProperty.asSpreadsheetValueType());
+					}
 				}
 			}
 			ss.insert(recordFeedUrl, newEntry);
+		}
+
+		// Update valueType row.
+		if (valueTypeNotSet) {
+			valueTypeRow.update();
 		}
 		return;
 	}
