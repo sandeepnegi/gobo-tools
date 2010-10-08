@@ -1,0 +1,5 @@
+#Mon Sep 20 14:27:22 JST 2010
+eclipse.preferences.version=1
+org.eclipse.jdt.apt.aptEnabled=true
+org.eclipse.jdt.apt.genSrcDir=src
+org.eclipse.jdt.apt.reconcileEnabled=true
