@@ -1,5 +1,6 @@
 package gobo.controller.dump;
 
+import gobo.AuthSubBase;
 import gobo.model.GbControl;
 import gobo.service.GbSpreadsheetService;
 
@@ -8,12 +9,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
-import org.slim3.datastore.Datastore;
-
 import com.google.appengine.api.datastore.Email;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
@@ -24,10 +23,10 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 
-public class StartController extends Controller {
+public class StartController extends AuthSubBase {
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String runAuth() throws Exception {
 
 		final String[] kinds = request.getParameterValues("kindArray");
 		final String token = sessionScope("token");
@@ -42,43 +41,41 @@ public class StartController extends Controller {
 
 		Transaction tx = null;
 		try {
-			tx = Datastore.beginTransaction();
+			tx = datastore.beginTransaction();
 
 			// Prepare control table.
-			Key controlId = Datastore.allocateId("dump");
-			List<GbControl> list = new ArrayList<GbControl>();
+			Key controlId = datastore.allocateIds("dump", 1).getStart();
+			List<Entity> list = new ArrayList<Entity>();
 			for (int i = 0; i < kinds.length; i++) {
-				GbControl control = new GbControl();
-				Key childKey = Datastore.createKey(controlId, GbControl.class, kinds[i]);
-				control.setKey(childKey);
-				control.setKindName(kinds[i]);
-				control.setCount(0);
+				Key childKey = KeyFactory.createKey(controlId, GbControl.NAME, kinds[i]);
+				Entity control = new Entity(childKey);
+				control.setProperty(GbControl.KIND_NAME, kinds[i]);
+				control.setProperty(GbControl.COUNT, 0);
 				if (currentUser != null) {
-					control.setReportTo(new Email(currentUser.getEmail()));
+					control.setProperty(GbControl.REPORT_TO, new Email(currentUser.getEmail()));
 				}
-				control.setAuthSubToken(token);
-				control.setSsKey(ssKey);
-				control.setTableId(String.valueOf(i));
-				control.setDate(new Date());
+				control.setProperty(GbControl.AUTH_SUB_TOKEN, token);
+				control.setProperty(GbControl.SPREADSHEET_KEY, ssKey);
+				control.setProperty(GbControl.TABLE_ID, String.valueOf(i));
+				control.setProperty(GbControl.UPDATE_DATE, new Date());
 				list.add(control);
 
 				// Call the "task chain" for each kind
 				Queue queue = QueueFactory.getDefaultQueue();
-				queue.add(tx, TaskOptions.Builder.url("/tasks/dump").param(
+				queue.add(tx, TaskOptions.Builder.url("/tasks/Dump.gobo").param(
 					"controlKey",
-					Datastore.keyToString(childKey)).method(Method.GET));
+					KeyFactory.keyToString(childKey)).method(Method.GET));
 			}
-			Datastore.put(tx, list);
-			Datastore.commit(tx);
+			datastore.put(tx, list);
+			tx.commit();
 
 		} catch (Exception e) {
-			Datastore.rollback(tx);
+			tx.rollback();
 			throw e;
 		}
 
-		return redirect("started?docURL="
+		return redirect("Started.gobo?docURL="
 			+ response.encodeRedirectURL(createSpreadsheet.getHtmlLink().getHref()));
 		// return redirect(createSpreadsheet.getHtmlLink().getHref());
 	}
-
 }

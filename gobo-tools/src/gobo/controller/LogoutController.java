@@ -1,14 +1,13 @@
 package gobo.controller;
 
+import gobo.ControllerBase;
+
 import javax.servlet.http.HttpSession;
 
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
-
-public class LogoutController extends Controller {
+public class LogoutController extends ControllerBase {
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String run() throws Exception {
 
 		String referer = request.getHeader("Referer");
 		HttpSession session = request.getSession(false);
@@ -20,5 +19,4 @@ public class LogoutController extends Controller {
 		}
 		return redirect(referer.substring(0, referer.indexOf('?')));
 	}
-
 }

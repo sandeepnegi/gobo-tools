@@ -1,12 +1,11 @@
 package gobo.controller.drop;
 
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
+import gobo.ControllerBase;
 
-public class StartedController extends Controller {
+public class StartedController extends ControllerBase {
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String run() throws Exception {
 		return forward("started.jsp");
 	}
 }

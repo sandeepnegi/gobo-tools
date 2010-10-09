@@ -1,7 +1,6 @@
 <%@page pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-<%@taglib prefix="f" uri="http://www.slim3.org/functions"%>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -24,7 +23,7 @@ google.setOnLoadCallback(initialize);
 </head>
 <body>
 <div>Prease select worksheet(s) to restore.</div>
-<form action="${f:url("start")}" method="POST" id="form1">
+<form action="Start.gobo" method="POST" id="form1">
 <input type="hidden" name="ssKey" value="${ssKey}" />
 <input type="button" value="Check All" id="checkall" />
 <input type="button" value="Uncheck All" id="uncheckall" />

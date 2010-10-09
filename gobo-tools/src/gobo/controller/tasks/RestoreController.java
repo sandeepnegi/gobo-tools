@@ -1,37 +1,35 @@
 package gobo.controller.tasks;
 
-import java.util.Date;
-import java.util.List;
-
+import gobo.ControllerBase;
 import gobo.dto.GbEntity;
-import gobo.meta.GbControlMeta;
 import gobo.model.GbControl;
 import gobo.service.GbDatastoreService;
 import gobo.service.GbSpreadsheetService;
 
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
-import org.slim3.datastore.Datastore;
+import java.util.Date;
+import java.util.List;
 
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
-public class RestoreController extends Controller {
+public class RestoreController extends ControllerBase {
 
 	final Integer RANGE = 100;
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String run() throws Exception {
 
 		final Key controlKey = asKey("controlKey");
-		GbControl gbControl = Datastore.get(new GbControlMeta(), controlKey);
-		final String ssKey = gbControl.getSsKey();
-		final String kind = gbControl.getKindName();
-		final Integer rowNum = gbControl.getCount();
-		final String token = gbControl.getAuthSubToken();
+		Entity control = datastore.get(controlKey);
+		final String ssKey = (String) control.getProperty(GbControl.SPREADSHEET_KEY);
+		final String kind = (String) control.getProperty(GbControl.KIND_NAME);
+		final Integer rowNum = new Integer((String) control.getProperty(GbControl.COUNT));
+		final String token = (String) control.getProperty(GbControl.AUTH_SUB_TOKEN);
 		System.out.println("Restoring kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
@@ -41,9 +39,9 @@ public class RestoreController extends Controller {
 
 		if (data == null) {
 			// Call the final task
-			queue.add(TaskOptions.Builder.url("/tasks/restoreEnd").param(
+			queue.add(TaskOptions.Builder.url("/tasks/RestoreEnd.gobo").param(
 				"controlKey",
-				Datastore.keyToString(controlKey)).method(Method.GET));
+				KeyFactory.keyToString(controlKey)).method(Method.GET));
 			return null;
 		}
 
@@ -52,14 +50,14 @@ public class RestoreController extends Controller {
 		datastoreUtil.restoreData(kind, data);
 
 		// Update control row.
-		gbControl.setCount(rowNum + RANGE);
-		gbControl.setDate(new Date());
-		Datastore.put(gbControl);
+		control.setProperty(GbControl.COUNT, rowNum + RANGE);
+		control.setProperty(GbControl.UPDATE_DATE, new Date());
+		datastore.put(control);
 
 		// タスクチェーンを継続
-		queue.add(TaskOptions.Builder.url("/tasks/restore").param(
+		queue.add(TaskOptions.Builder.url("/tasks/Restore.gobo").param(
 			"controlKey",
-			Datastore.keyToString(controlKey)).method(Method.GET));
+			KeyFactory.keyToString(controlKey)).method(Method.GET));
 
 		return null;
 	}

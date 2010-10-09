@@ -1,15 +1,8 @@
-package gobo.filter;
+package gobo;
 
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.security.GeneralSecurityException;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,19 +10,11 @@ import javax.servlet.http.HttpSession;
 import com.google.gdata.client.http.AuthSubUtil;
 import com.google.gdata.util.AuthenticationException;
 
-public class AuthSubFilter implements Filter {
+public abstract class AuthSubBase extends ControllerBase {
 
 	@Override
-	public void init(FilterConfig arg0) throws ServletException {
-		// TODO Auto-generated method stub
-	}
+	protected String run() throws Exception {
 
-	@Override
-	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-			throws IOException, ServletException {
-
-		HttpServletRequest request = (HttpServletRequest) req;
-		HttpServletResponse response = (HttpServletResponse) res;
 		HttpSession session = request.getSession(true);
 		if (session.getAttribute("token") == null) {
 
@@ -79,16 +64,11 @@ public class AuthSubFilter implements Filter {
 							false,
 							true);
 
-				response.sendRedirect(redirectURL);
-				return;
+				return redirectURL + ControllerBase.REDIRECT_FLAG;
 			}
 		}
-
-		chain.doFilter(req, res);
+		return runAuth();
 	}
 
-	@Override
-	public void destroy() {
-		// TODO Auto-generated method stub
-	}
+	protected abstract String runAuth() throws Exception;
 }

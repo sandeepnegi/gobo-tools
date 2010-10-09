@@ -1,18 +1,16 @@
 package gobo.controller.restore;
 
+import gobo.AuthSubBase;
 import gobo.service.GbSpreadsheetService;
 
 import java.util.List;
 import java.util.Map;
 
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
 
-
-public class IndexController extends Controller {
+public class IndexController extends AuthSubBase {
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String runAuth() throws Exception {
 
 		GbSpreadsheetService service = new GbSpreadsheetService((String) sessionScope("token"));
 		List<Map<String, String>> list = service.getAllSpreadSheets();
@@ -20,5 +18,4 @@ public class IndexController extends Controller {
 
 		return forward("index.jsp");
 	}
-
 }

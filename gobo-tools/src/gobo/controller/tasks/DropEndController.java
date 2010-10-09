@@ -1,36 +1,34 @@
 package gobo.controller.tasks;
 
-import gobo.meta.GbControlMeta;
+import gobo.ControllerBase;
 import gobo.model.GbControl;
 import gobo.service.GbMailService;
 
-import java.util.List;
-
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
-import org.slim3.datastore.Datastore;
-
+import com.google.appengine.api.datastore.Email;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Query;
 
-public class DropEndController extends Controller {
+public class DropEndController extends ControllerBase {
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String run() throws Exception {
 
 		final Key controlKey = asKey("controlKey");
-		GbControl gbControl = Datastore.get(new GbControlMeta(), controlKey);
+		Entity control = datastore.get(controlKey);
 
 		// Delete control row.
-		Datastore.delete(controlKey);
+		datastore.delete(controlKey);
 
 		final Key parentKey = controlKey.getParent();
-		List<GbControl> list = Datastore.query(GbControl.class, parentKey).asList();
-		if ((list == null) || (list.size() == 0)) {
-
+		int count =
+			datastore.prepare(new Query(GbControl.NAME).setAncestor(parentKey)).countEntities();
+		if (count == 0) {
 			// Mail
 			final long controlId = parentKey.getId();
-			if (gbControl.getReportTo() != null) {
-				GbMailService.sendMail(gbControl.getReportTo(), controlId, "Drop");
+			Object reportTo = control.getProperty(GbControl.REPORT_TO);
+			if (reportTo != null) {
+				GbMailService.sendMail((Email) reportTo, controlId, "Drop");
 			}
 			System.out.println("Finished");
 		}
