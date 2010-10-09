@@ -1,12 +1,11 @@
 package gobo.controller;
 
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
+import gobo.ControllerBase;
 
-public class IndexController extends Controller {
+public class IndexController extends ControllerBase {
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String run() throws Exception {
 				
 		return forward("index.jsp");
 	}

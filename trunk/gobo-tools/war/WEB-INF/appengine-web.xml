@@ -8,10 +8,11 @@
 	<static-files>
         <include path="/favicon.ico" />
         <include path="/**.png" />
+        <include path="/**.css" />
+        <include path="/**.js" />
     </static-files>
     
 	<system-properties>
-	    <property name="slim3.hotReloading" value="true"/>
 	    <property name="java.util.logging.config.file" value="WEB-INF/classes/logging.properties"/>
 	</system-properties>
 	<sessions-enabled>true</sessions-enabled>

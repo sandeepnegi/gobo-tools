@@ -2,7 +2,6 @@
 <%@page pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-<%@taglib prefix="f" uri="http://www.slim3.org/functions"%>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -26,9 +25,9 @@ background: #ddd;
 <body>
 <h1>Gobo Tools</h1>
 <div style="text-align:center;">
-  <div class="button"><a href="${f:url("/dump/")}"/>Dump</a></div>
-  <div class="button"><a href="${f:url("/restore/")}"/>Restore</a></div>
-  <div class="button"><a href="${f:url("/drop/")}"/>Drop</a></div>
+  <div class="button"><a href="dump/Index.gobo"/>Dump</a></div>
+  <div class="button"><a href="restore/Index.gobo"/>Restore</a></div>
+  <div class="button"><a href="drop/Index.gobo"/>Drop</a></div>
 </div>
 </body>
 </html>

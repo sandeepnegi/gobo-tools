@@ -2,13 +2,12 @@ package gobo.service;
 
 import gobo.dto.GbEntity;
 import gobo.dto.GbProperty;
-import gobo.meta.GbControlMeta;
+import gobo.model.GbControl;
+import gobo.slim3.AppEngineUtil;
+import gobo.slim3.DatastoreUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slim3.datastore.DatastoreUtil;
-import org.slim3.util.AppEngineUtil;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -36,12 +35,12 @@ public class GbDatastoreService {
 			for (Entity kind : list) {
 				String kindName = (String) kind.getProperty("kind_name");
 				if ((kindName.startsWith("_") == false)
-					&& (kindName.equals(GbControlMeta.get().getKind()) == false)) {
+					&& (kindName.equals(GbControl.NAME) == false)) {
 					kinds.add(kindName);
 				}
 			}
 		} else {
-			kinds = org.slim3.datastore.DatastoreUtil.getKinds();
+			kinds = DatastoreUtil.getKinds();
 		}
 
 		return kinds;
@@ -145,4 +144,5 @@ public class GbDatastoreService {
 		return key;
 	}
 
+	
 }

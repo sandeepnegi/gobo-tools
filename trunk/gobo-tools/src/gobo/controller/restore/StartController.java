@@ -1,17 +1,16 @@
 package gobo.controller.restore;
 
+import gobo.AuthSubBase;
 import gobo.model.GbControl;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
-import org.slim3.datastore.Datastore;
-
 import com.google.appengine.api.datastore.Email;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
@@ -21,10 +20,10 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
-public class StartController extends Controller {
+public class StartController extends AuthSubBase {
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String runAuth() throws Exception {
 
 		final String ssKey = asString("ssKey");
 		final String[] wsTitles = request.getParameterValues("wsTitleArray");
@@ -35,39 +34,38 @@ public class StartController extends Controller {
 		// コントロールテーブルを用意
 		Transaction tx = null;
 		try {
-			tx = Datastore.beginTransaction();
+			tx = datastore.beginTransaction();
 
 			// コントロールテーブルを準備
-			Key controlId = Datastore.allocateId("restore");
-			List<GbControl> list = new ArrayList<GbControl>();
+			Key controlId = datastore.allocateIds("restore", 1).getStart();
+			List<Entity> list = new ArrayList<Entity>();
 			for (int i = 0; i < wsTitles.length; i++) {
-				GbControl control = new GbControl();
-				Key childKey = Datastore.createKey(controlId, GbControl.class, wsTitles[i]);
-				control.setKey(childKey);
-				control.setKindName(wsTitles[i]);
-				control.setCount(2); // ignore header!
+				Key childKey = KeyFactory.createKey(controlId, GbControl.NAME, wsTitles[i]);
+				Entity control = new Entity(childKey);
+				control.setProperty(GbControl.KIND_NAME, wsTitles[i]);
+				control.setProperty(GbControl.COUNT, 2); // ignore header!
 				if (currentUser != null) {
-					control.setReportTo(new Email(currentUser.getEmail()));
+					control.setProperty(GbControl.REPORT_TO, new Email(currentUser.getEmail()));
 				}
-				control.setAuthSubToken(token);
-				control.setSsKey(ssKey);
-				control.setDate(new Date());
+				control.setProperty(GbControl.AUTH_SUB_TOKEN, token);
+				control.setProperty(GbControl.SPREADSHEET_KEY, ssKey);
+				control.setProperty(GbControl.UPDATE_DATE, new Date());
 				list.add(control);
 
 				// タスクチェーンをワークシートごとにパラレルで起動
 				Queue queue = QueueFactory.getDefaultQueue();
-				queue.add(tx, TaskOptions.Builder.url("/tasks/restore").param(
+				queue.add(tx, TaskOptions.Builder.url("/tasks/Restore.gobo").param(
 					"controlKey",
-					Datastore.keyToString(childKey)).method(Method.GET));
+					KeyFactory.keyToString(childKey)).method(Method.GET));
 			}
-			Datastore.put(tx, list);
-			Datastore.commit(tx);
+			datastore.put(tx, list);
+			tx.commit();
 
 		} catch (Exception e) {
-			Datastore.rollback(tx);
+			tx.rollback();
 			throw e;
 		}
 
-		return redirect("started");
+		return redirect("Started.gobo");
 	}
 }

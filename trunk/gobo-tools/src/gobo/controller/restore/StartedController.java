@@ -1,12 +1,11 @@
 package gobo.controller.restore;
 
-import org.slim3.controller.Controller;
-import org.slim3.controller.Navigation;
+import gobo.AuthSubBase;
 
-public class StartedController extends Controller {
+public class StartedController extends AuthSubBase {
 
 	@Override
-	protected Navigation run() throws Exception {
+	protected String runAuth() throws Exception {
 		return forward("started.jsp");
 	}
 }
