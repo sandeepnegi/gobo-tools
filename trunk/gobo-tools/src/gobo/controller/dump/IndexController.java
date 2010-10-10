@@ -20,6 +20,9 @@ public class IndexController extends AuthSubBase {
 		for (String kind : kinds) {
 			Map<String, Object> row = new HashMap<String, Object>();
 			int count = datastore.prepare(new Query(kind)).countEntities();
+			if (count == 0) {
+				continue;
+			}
 			row.put("name", kind);
 			row.put("count", count);
 			list.add(row);
