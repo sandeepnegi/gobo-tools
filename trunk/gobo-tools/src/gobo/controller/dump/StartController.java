@@ -56,7 +56,6 @@ public class StartController extends AuthSubBase {
 				}
 				control.setProperty(GbControl.AUTH_SUB_TOKEN, token);
 				control.setProperty(GbControl.SPREADSHEET_KEY, ssKey);
-				control.setProperty(GbControl.TABLE_ID, String.valueOf(i));
 				control.setProperty(GbControl.UPDATE_DATE, new Date());
 				list.add(control);
 

@@ -7,7 +7,7 @@ public class IndexController extends ControllerBase {
 	@Override
 	protected String run() throws Exception {
 				
-		return forward("index.jsp");
+		return forward("/gobo/index.jsp");
 	}
 
 }
