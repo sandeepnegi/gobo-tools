@@ -53,7 +53,7 @@ public abstract class ControllerBase {
 		if (attribute == null) {
 			return null;
 		}
-		return (Integer) attribute;
+		return Integer.parseInt((String) attribute);
 	}
 
 	protected Key asKey(String string) {
