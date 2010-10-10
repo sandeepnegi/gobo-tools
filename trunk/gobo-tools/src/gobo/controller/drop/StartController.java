@@ -49,7 +49,7 @@ public class StartController extends ControllerBase {
 				control.setProperty(GbControl.UPDATE_DATE, new Date());
 				list.add(control);
 
-				// Call the "task chain" for each kind
+				// Start task queue chain for each kind.
 				Queue queue = QueueFactory.getDefaultQueue();
 				queue.add(tx, TaskOptions.Builder.url("/tasks/Drop.gobo").param(
 					"controlKey",

@@ -22,7 +22,7 @@ google.setOnLoadCallback(initialize);
 </script>
 </head>
 <body>
-<div style="position:absolute; top:10px; right:10px;"><a href="../logout">logout</a></div>
+<div style="position:absolute; top:10px; right:10px;"><a href="../Logout.gobo">logout</a></div>
 <div>Please select kind(s) to dump.</div>
 <form action="Start.gobo" method="POST" id="form1">
 <input type="button" value="Check All" id="checkall" />
