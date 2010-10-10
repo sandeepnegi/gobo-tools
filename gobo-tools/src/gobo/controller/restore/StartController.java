@@ -52,11 +52,11 @@ public class StartController extends AuthSubBase {
 				control.setProperty(GbControl.UPDATE_DATE, new Date());
 				list.add(control);
 
-				// タスクチェーンをワークシートごとにパラレルで起動
+				// Start task queue chain for each kind.
 				Queue queue = QueueFactory.getDefaultQueue();
 				queue.add(tx, TaskOptions.Builder.url("/tasks/Restore.gobo").param(
 					"controlKey",
-					KeyFactory.keyToString(childKey)).method(Method.GET));
+					KeyFactory.keyToString(childKey)).countdownMillis(10000).method(Method.GET));
 			}
 			datastore.put(tx, list);
 			tx.commit();

@@ -8,6 +8,6 @@
 </head>
 <body>
 Started to restore!<br />
-<a href="../Index.gobo">menu</a>
+<a href="../Index.gobo">Menu</a>
 </body>
 </html>

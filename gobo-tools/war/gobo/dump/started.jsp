@@ -9,6 +9,6 @@
 <body>
 Started to dump!<br />
 <a href="${docURL}" target="_blank">${docURL}</a><br />
-<a href="../Index.gobo">menu</a>
+<a href="../Index.gobo">Menu</a>
 </body>
 </html>
