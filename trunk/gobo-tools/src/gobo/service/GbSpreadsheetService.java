@@ -388,21 +388,7 @@ public class GbSpreadsheetService {
 					// Update valueType Cell
 					if (valueTypeNotSet) {
 						Field valueTypeCell = valueTypeRowMap.get(gbProperty.getName());
-						
-						
-						
-						if (valueTypeCell == null) {
-							Iterator<String> iterator = valueTypeRowMap.keySet().iterator();
-							while(iterator.hasNext()) {
-								String key = iterator.next();
-								System.out.println(kind + ":" + tableId + ":" + key + ":" + valueTypeRowMap.get(key));
-							}
-							System.out.println(kind + ":" + tableId + ":" + gbProperty.getName());
-						}
-						
-						
-						
-						
+						// TODO if statistics is not updated, valueTypeCell would be null.
 						valueTypeCell.setValue(gbProperty.asSpreadsheetValueType());
 					}
 				}
