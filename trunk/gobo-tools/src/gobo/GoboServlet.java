@@ -29,23 +29,17 @@ public class GoboServlet extends HttpServlet {
 			controller.request = request;
 			controller.response = response;
 			String reternString = controller.run();
-			if (reternString.endsWith(ControllerBase.REDIRECT_FLAG)) {
-				reternString = reternString.replace(ControllerBase.REDIRECT_FLAG, "");
-				response.sendRedirect(reternString);
-			} else {
-				RequestDispatcher dispatcher = request.getRequestDispatcher(reternString);
-				dispatcher.forward(request, response);
+			if (reternString != null) {
+				if (reternString.endsWith(ControllerBase.REDIRECT_FLAG)) {
+					reternString = reternString.replace(ControllerBase.REDIRECT_FLAG, "");
+					response.sendRedirect(reternString);
+				} else {
+					RequestDispatcher dispatcher = request.getRequestDispatcher(reternString);
+					dispatcher.forward(request, response);
+				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
-			// try {
-			// response.setContentType("text/html");
-			// response.getWriter().println("<html><head><title>エラー</title></head><body>");
-			// response.getWriter().println(e.getMessage());
-			// response.getWriter().println("</body>");
-			// e.printStackTrace();
-			// } catch (Exception iex) {
-			// }
 		}
 	}
 }

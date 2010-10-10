@@ -57,7 +57,7 @@ public class DumpController extends ControllerBase {
 		PreparedQuery query = datastore.prepare(new Query(kind));
 		FetchOptions fetchOptions = null;
 		if (cursor == null) {
-			fetchOptions = FetchOptions.Builder.withDefaults();
+			fetchOptions = FetchOptions.Builder.withLimit(RANGE);
 		} else {
 			fetchOptions =
 				FetchOptions.Builder.withStartCursor(Cursor.fromWebSafeString(cursor)).limit(RANGE);
