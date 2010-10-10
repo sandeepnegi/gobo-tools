@@ -21,7 +21,7 @@ background: #ddd;
 }
 </style>
 </head>
-<link rel="stylesheet" href="css/global.css" />
+<link rel="stylesheet" href="/gobo/css/global.css" />
 <body>
 <h1>Gobo Tools</h1>
 <div style="text-align:center;">

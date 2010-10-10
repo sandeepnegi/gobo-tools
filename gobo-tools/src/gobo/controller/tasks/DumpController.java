@@ -36,7 +36,7 @@ public class DumpController extends ControllerBase {
 		Entity control = datastore.get(controlKey);
 		final String ssKey = (String) control.getProperty(GbControl.SPREADSHEET_KEY);
 		final String kind = (String) control.getProperty(GbControl.KIND_NAME);
-		final String tableId = (String) control.getProperty(GbControl.TABLE_ID);
+		String tableId = (String) control.getProperty(GbControl.TABLE_ID);
 		final String cursor = (String) control.getProperty(GbControl.CURSOR);
 		final Long rowNum = (Long) control.getProperty(GbControl.COUNT);
 		final String token = (String) control.getProperty(GbControl.AUTH_SUB_TOKEN);
@@ -50,7 +50,7 @@ public class DumpController extends ControllerBase {
 		if (cursor == null) {
 			List<GbProperty> properties = GbDatastoreService.getProperties(kind);
 			spreadsheetService.updateWorksheetSize(ssKey, kind, properties.size());
-			spreadsheetService.createTableInWorksheet(ssKey, kind, properties);
+			tableId = spreadsheetService.createTableInWorksheet(ssKey, kind, properties);
 		}
 
 		// Get data from datastore.
@@ -92,6 +92,7 @@ public class DumpController extends ControllerBase {
 
 		// Update the control table.
 		control.setProperty(GbControl.CURSOR, data.getCursor().toWebSafeString());
+		control.setProperty(GbControl.TABLE_ID, tableId);
 		control.setProperty(GbControl.COUNT, rowNum + RANGE);
 		control.setProperty(GbControl.UPDATE_DATE, new Date());
 		datastore.put(control);

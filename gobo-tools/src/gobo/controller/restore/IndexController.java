@@ -15,7 +15,6 @@ public class IndexController extends AuthSubBase {
 		GbSpreadsheetService service = new GbSpreadsheetService((String) sessionScope("token"));
 		List<Map<String, String>> list = service.getAllSpreadSheets();
 		requestScope("list", list);
-
-		return forward("index.jsp");
+		return forward("/gobo/restore/index.jsp");
 	}
 }

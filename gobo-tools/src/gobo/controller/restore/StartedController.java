@@ -6,6 +6,6 @@ public class StartedController extends AuthSubBase {
 
 	@Override
 	protected String runAuth() throws Exception {
-		return forward("started.jsp");
+		return forward("/gobo/restore/started.jsp");
 	}
 }

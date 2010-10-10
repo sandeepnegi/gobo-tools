@@ -6,6 +6,6 @@ public class StartedController extends ControllerBase {
 
 	@Override
 	protected String run() throws Exception {
-		return forward("started.jsp");
+		return forward("/gobo/drop/started.jsp");
 	}
 }

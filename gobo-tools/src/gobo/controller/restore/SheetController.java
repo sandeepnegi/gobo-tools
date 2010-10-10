@@ -19,6 +19,6 @@ public class SheetController extends AuthSubBase {
 		List<Map<String, String>> list = service.getAllWorkSheets(ssKey);
 		requestScope("list", list);
 
-		return forward("sheet.jsp");
+		return forward("/gobo/restore/sheet.jsp");
 	}
 }

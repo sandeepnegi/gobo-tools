@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -286,7 +287,7 @@ public class GbSpreadsheetService {
 	 * @param properties
 	 * @throws Exception
 	 */
-	public void createTableInWorksheet(String ssKey, String kind, List<GbProperty> properties)
+	public String createTableInWorksheet(String ssKey, String kind, List<GbProperty> properties)
 			throws Exception {
 
 		FeedURLFactory factory = FeedURLFactory.getDefault();
@@ -324,6 +325,8 @@ public class GbSpreadsheetService {
 			tableEntry.setData(tableData);
 			tableEntry = ss.insert(tableFeedUrl, tableEntry);
 		}
+		String[] split = tableEntry.getId().split("/");
+		final String tableId = split[split.length - 1];
 
 		// Add a "valueType" row (as "*" to be replaced)
 		int numberOfRows = tableEntry.getData().getNumberOfRows();
@@ -337,11 +340,10 @@ public class GbSpreadsheetService {
 				// newEntry.addField(new Field(null, columnName, type));
 				newEntry.addField(new Field(null, columnName, VALUE_TYPE_NOT_SET));
 			}
-			String[] split = tableEntry.getId().split("/");
-			final String tableId = split[split.length - 1];
 			URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
 			ss.insert(recordFeedUrl, newEntry);
 		}
+		return tableId;
 	}
 
 	/**
@@ -386,6 +388,21 @@ public class GbSpreadsheetService {
 					// Update valueType Cell
 					if (valueTypeNotSet) {
 						Field valueTypeCell = valueTypeRowMap.get(gbProperty.getName());
+						
+						
+						
+						if (valueTypeCell == null) {
+							Iterator<String> iterator = valueTypeRowMap.keySet().iterator();
+							while(iterator.hasNext()) {
+								String key = iterator.next();
+								System.out.println(kind + ":" + tableId + ":" + key + ":" + valueTypeRowMap.get(key));
+							}
+							System.out.println(kind + ":" + tableId + ":" + gbProperty.getName());
+						}
+						
+						
+						
+						
 						valueTypeCell.setValue(gbProperty.asSpreadsheetValueType());
 					}
 				}

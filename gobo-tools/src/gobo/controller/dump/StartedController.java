@@ -8,6 +8,6 @@ public class StartedController extends AuthSubBase {
 	protected String runAuth() throws Exception {
 		final String docURL = asString("docURL");
 		requestScope("docURL", docURL);
-		return forward("started.jsp");
+		return forward("/gobo/dump/started.jsp");
 	}
 }

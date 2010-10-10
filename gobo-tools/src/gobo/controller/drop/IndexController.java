@@ -25,7 +25,8 @@ public class IndexController extends ControllerBase {
 			list.add(row);
 		}
 		requestScope("list", list);
-		return forward("index.jsp");
+		
+		return forward("/gobo/drop/index.jsp");
 	}
 
 }

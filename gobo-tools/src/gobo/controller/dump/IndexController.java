@@ -25,6 +25,7 @@ public class IndexController extends AuthSubBase {
 			list.add(row);
 		}
 		requestScope("list", list);
-		return forward("index.jsp");
+		
+		return forward("/gobo/dump/index.jsp");
 	}
 }
