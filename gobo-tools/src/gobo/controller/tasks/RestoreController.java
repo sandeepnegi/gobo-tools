@@ -28,7 +28,7 @@ public class RestoreController extends ControllerBase {
 		Entity control = datastore.get(controlKey);
 		final String ssKey = (String) control.getProperty(GbControl.SPREADSHEET_KEY);
 		final String kind = (String) control.getProperty(GbControl.KIND_NAME);
-		final Integer rowNum = new Integer((String) control.getProperty(GbControl.COUNT));
+		final Integer rowNum = ((Long) control.getProperty(GbControl.COUNT)).intValue();
 		final String token = (String) control.getProperty(GbControl.AUTH_SUB_TOKEN);
 		System.out.println("Restoring kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();

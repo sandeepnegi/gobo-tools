@@ -13,6 +13,7 @@ public class SheetController extends AuthSubBase {
 	protected String runAuth() throws Exception {
 
 		final String ssKey = asString("ssKey");
+		requestScope("ssKey", ssKey);
 		
 		GbSpreadsheetService service = new GbSpreadsheetService((String) sessionScope("token"));
 		List<Map<String, String>> list = service.getAllWorkSheets(ssKey);

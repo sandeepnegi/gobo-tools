@@ -11,7 +11,7 @@
 <div>Please select a spreadsheet to restore.</div>
 <ul>
 <c:forEach items="${list}" var="row">
-<li><a href="Sheet?ssKey=${row.key}">${row.title}</a></li>
+<li><a href="Sheet.gobo?ssKey=${row.key}">${row.title}</a></li>
 </c:forEach>
 </ul>
 </body>
