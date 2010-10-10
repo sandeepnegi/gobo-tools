@@ -76,6 +76,5 @@ public class StartController extends AuthSubBase {
 
 		return redirect("Started.gobo?docURL="
 			+ response.encodeRedirectURL(createSpreadsheet.getHtmlLink().getHref()));
-		// return redirect(createSpreadsheet.getHtmlLink().getHref());
 	}
 }

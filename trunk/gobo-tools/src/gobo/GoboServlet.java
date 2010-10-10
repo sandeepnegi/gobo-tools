@@ -29,6 +29,7 @@ public class GoboServlet extends HttpServlet {
 			controller.request = request;
 			controller.response = response;
 			String reternString = controller.run();
+			
 			if (reternString != null) {
 				if (reternString.endsWith(ControllerBase.REDIRECT_FLAG)) {
 					reternString = reternString.replace(ControllerBase.REDIRECT_FLAG, "");
