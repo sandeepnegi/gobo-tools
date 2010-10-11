@@ -21,6 +21,7 @@ import com.google.appengine.api.datastore.PostalAddress;
 import com.google.appengine.api.datastore.Rating;
 import com.google.appengine.api.datastore.ShortBlob;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.datastore.IMHandle.Scheme;
 import com.google.appengine.api.users.User;
 
 public class GbProperty {
@@ -205,7 +206,7 @@ public class GbProperty {
 		} else if (valueType.equals(DOUBLE)) {
 			val = new Double((String) value);
 		} else if (valueType.equals(USER)) {
-			String[] split = ((String) value).split("/");
+			String[] split = ((String) value).split(VALUE_SEPARATER);
 			val = new User(split[0], split[1], split[2], split[3]);
 		} else if (valueType.equals(KEY)) {
 			val = GbDatastoreService.parseKey((String) value);
@@ -216,10 +217,12 @@ public class GbProperty {
 			val = new Text((String) value);
 		} else if (valueType.equals(DATE)) {
 			val = new Date(Long.parseLong((String) value));
+		} else if (valueType.equals(LINK)) {
+			val = new Link((String) value);
 		} else if (valueType.equals(SHORT_BLOB)) {
 			throw new RuntimeException("ShortBlob is not supported.");
 		} else if (valueType.equals(GEO_PT)) {
-			String[] split = ((String) value).split("/");
+			String[] split = ((String) value).split(VALUE_SEPARATER);
 			val = new GeoPt(Float.parseFloat(split[0]), Float.parseFloat(split[1]));
 		} else if (valueType.equals(CATEGORY)) {
 			val = new Category((String) value);
@@ -231,13 +234,19 @@ public class GbProperty {
 			val = new PostalAddress((String) value);
 		} else if (valueType.equals(EMAIL)) {
 			val = new Email((String) value);
+		} else if (valueType.equals(IMHANDLE)) {
+			String[] split = ((String) value).split(" ");
+			val = new IMHandle(Scheme.valueOf(split[0]), split[1]);
 		} else if (valueType.equals(BLOB_KEY)) {
 			val = new BlobKey((String) value);
 		} else if (valueType.startsWith(LIST + "<")) {
-			List<Object> list = new ArrayList<Object>();
+			String innerValueType = valueType.substring(valueType.indexOf('<') + 1);
+			innerValueType = innerValueType.substring(0, innerValueType.indexOf('>'));
 			String[] split = ((String) value).split(",");
+			List<Object> list = new ArrayList<Object>();
 			for (int i = 0; i < split.length; i++) {
 				GbProperty innser = new GbProperty();
+				innser.setValueType(innerValueType);
 				innser.setValue(split[i]);
 				list.add(innser.asDatastoreValue());
 			}
