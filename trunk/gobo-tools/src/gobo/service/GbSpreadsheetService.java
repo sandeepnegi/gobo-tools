@@ -104,7 +104,7 @@ public class GbSpreadsheetService {
 			Map<String, String> row = new HashMap<String, String>();
 			// row.put("wsID", workSheet.getId());
 			row.put("wsTitle", workSheet.getTitle().getPlainText());
-			row.put("rowCount", String.valueOf(workSheet.getRowCount()));
+			row.put("rowCount", String.valueOf(workSheet.getRowCount() - 3));
 			list.add(row);
 		}
 		return list;
@@ -193,7 +193,7 @@ public class GbSpreadsheetService {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		final String fileName = appId + "_" + sdf.format(new Date());
 		System.out.println("created new file:" + fileName);
-		DocumentListEntry entry = new com.google.gdata.data.docs.SpreadsheetEntry();		
+		DocumentListEntry entry = new com.google.gdata.data.docs.SpreadsheetEntry();
 		entry.setTitle(new PlainTextConstruct(fileName));
 		DocumentListEntry newSpreadSheet =
 			cs.insert(new URL("https://docs.google.com/feeds/default/private/full/"), entry);
@@ -207,7 +207,7 @@ public class GbSpreadsheetService {
 			SpreadsheetFeed spreadsheetFeed = ss.query(spreadsheetQuery, SpreadsheetFeed.class);
 			SpreadsheetEntry spreadsheetEntry = spreadsheetFeed.getEntries().get(0);
 
-			// Modifying a default worksheet
+			// Modify a default worksheet
 			URL worksheetFeedUrl = spreadsheetEntry.getWorksheetFeedUrl();
 			WorksheetFeed worksheetFeed = ss.getFeed(worksheetFeedUrl, WorksheetFeed.class);
 			WorksheetEntry defaultWorksheet = worksheetFeed.getEntries().get(0);
@@ -216,7 +216,7 @@ public class GbSpreadsheetService {
 			defaultWorksheet.setColCount(1);
 			defaultWorksheet.update();
 
-			// Adding Worksheets
+			// Add other Worksheets
 			for (int i = 1; i < targetKinds.size(); i++) {
 				WorksheetEntry newWorksheet = new WorksheetEntry();
 				newWorksheet.setTitle(new PlainTextConstruct(targetKinds.get(i)));
@@ -264,7 +264,7 @@ public class GbSpreadsheetService {
 			}
 		}
 
-		// Modifying a worksheet column size
+		// Modify a worksheet's column size
 		URL worksheetFeedUrl = spreadsheetEntry.getWorksheetFeedUrl();
 		WorksheetFeed worksheetFeed = ss.getFeed(worksheetFeedUrl, WorksheetFeed.class);
 		WorksheetEntry worksheetEntry = null;
@@ -327,7 +327,7 @@ public class GbSpreadsheetService {
 		String[] split = tableEntry.getId().split("/");
 		final String tableId = split[split.length - 1];
 
-		// Add a "valueType" row (as "*" to be replaced)
+		// Add a "valueType" row (the cells are filled with "*" to be replaced)
 		int numberOfRows = tableEntry.getData().getNumberOfRows();
 		if (numberOfRows == 0) {
 			RecordEntry newEntry = new RecordEntry();
@@ -335,8 +335,6 @@ public class GbSpreadsheetService {
 			for (int i = 0; i < properties.size(); i++) {
 				GbProperty gbProperty = properties.get(i);
 				String columnName = gbProperty.getName();
-				// String type = gbProperty.asSpreadsheetValueType();
-				// newEntry.addField(new Field(null, columnName, type));
 				newEntry.addField(new Field(null, columnName, VALUE_TYPE_NOT_SET));
 			}
 			URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
@@ -351,11 +349,10 @@ public class GbSpreadsheetService {
 	 * @param ssKey
 	 * @param tableId
 	 * @param list
-	 * @throws IOException
-	 * @throws ServiceException
+	 * @throws Exception
 	 */
 	public void dumpData(String ssKey, String kind, String tableId, List<GbEntity> list)
-			throws IOException, ServiceException {
+			throws Exception {
 
 		FeedURLFactory factory = FeedURLFactory.getDefault();
 		URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
@@ -373,31 +370,52 @@ public class GbSpreadsheetService {
 			}
 		}
 
-		// Adding new rows to table
-		for (GbEntity gbEntity : list) {
-			RecordEntry newEntry = new RecordEntry();
-			newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, gbEntity
-				.getKey()
-				.toString()));
-			for (GbProperty gbProperty : gbEntity.getProperties()) {
-				String value = gbProperty.asSpreadsheetValue();
-				if (value != null) {
-					newEntry.addField(new Field(null, gbProperty.getName(), value));
+		// Add new rows to table
+		List<RecordEntry> newRecordList = new ArrayList<RecordEntry>();
+		try {
+			for (GbEntity gbEntity : list) {
+				RecordEntry newEntry = new RecordEntry();
+				final String key = gbEntity.getKey().toString();
+				newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, key));
+				for (GbProperty gbProperty : gbEntity.getProperties()) {
+					final String value = gbProperty.asSpreadsheetValue();
+					if (value == null) {
+						continue;
+					}
+					final String columnName = gbProperty.getName();
+					// System.out.println(columnName + ": " + value);
+					if (valueTypeRowMap.containsKey(columnName) == false) {
+						continue; // when the colum name is undefined.
+					}
+					newEntry.addField(new Field(null, columnName, value));
 
 					// Update valueType Cell
 					if (valueTypeNotSet) {
-						Field valueTypeCell = valueTypeRowMap.get(gbProperty.getName());
-						// TODO if statistics is not updated, valueTypeCell would be null.
-						valueTypeCell.setValue(gbProperty.asSpreadsheetValueType());
+						Field valueTypeCell = valueTypeRowMap.get(columnName);
+						// Avoid when statistics is not updated.
+						if (valueTypeCell != null) {
+							valueTypeCell.setValue(gbProperty.asSpreadsheetValueType());
+						}
 					}
 				}
+				RecordEntry inserted = ss.insert(recordFeedUrl, newEntry);
+				newRecordList.add(inserted);
 			}
-			ss.insert(recordFeedUrl, newEntry);
-		}
-
-		// Update valueType row.
-		if (valueTypeNotSet) {
-			valueTypeRow.update();
+			
+			// Update valueType row.
+			if (valueTypeNotSet) {
+				valueTypeRow.update();
+			}
+			
+		} catch (Exception e) {
+			for (RecordEntry inserted : newRecordList) {
+				try {
+					inserted.delete();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+			throw e;
 		}
 		return;
 	}

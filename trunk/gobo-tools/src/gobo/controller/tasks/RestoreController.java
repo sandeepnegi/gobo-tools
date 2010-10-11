@@ -39,7 +39,7 @@ public class RestoreController extends ControllerBase {
 
 		if (data == null) {
 			// Call the final task
-			queue.add(TaskOptions.Builder.url("/tasks/RestoreEnd.gobo").param(
+			queue.add(TaskOptions.Builder.url("/tasks/restoreEnd.gobo").param(
 				"controlKey",
 				KeyFactory.keyToString(controlKey)).method(Method.GET));
 			return null;
@@ -55,7 +55,7 @@ public class RestoreController extends ControllerBase {
 		datastore.put(control);
 
 		// タスクチェーンを継続
-		queue.add(TaskOptions.Builder.url("/tasks/Restore.gobo").param(
+		queue.add(TaskOptions.Builder.url("/tasks/restore.gobo").param(
 			"controlKey",
 			KeyFactory.keyToString(controlKey)).method(Method.GET));
 

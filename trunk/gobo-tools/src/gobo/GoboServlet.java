@@ -22,14 +22,22 @@ public class GoboServlet extends HttpServlet {
 			String uri = request.getRequestURI();
 			uri = uri.replaceAll(".gobo", "");
 			uri = uri.replaceAll("/", ".");
+			int pos = uri.lastIndexOf('.');
+			String subPackage = uri.substring(0, pos + 1);
+			String className = uri.substring(pos + 1);
+			char chars[] = className.toCharArray();
+			chars[0] = Character.toUpperCase(chars[0]);
+			className = new String(chars);
+			final String fullName = "gobo.controller" + subPackage + className + "Controller";
+			System.out.println(fullName);
 
-			Class clazz = Class.forName("gobo.controller" + uri + "Controller");
+			Class clazz = Class.forName(fullName);
 			ControllerBase controller = (ControllerBase) clazz.newInstance();
 
 			controller.request = request;
 			controller.response = response;
 			String reternString = controller.run();
-			
+
 			if (reternString != null) {
 				if (reternString.endsWith(ControllerBase.REDIRECT_FLAG)) {
 					reternString = reternString.replace(ControllerBase.REDIRECT_FLAG, "");
@@ -43,4 +51,5 @@ public class GoboServlet extends HttpServlet {
 			throw new RuntimeException(e);
 		}
 	}
+
 }

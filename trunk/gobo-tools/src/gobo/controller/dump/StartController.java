@@ -61,7 +61,7 @@ public class StartController extends AuthSubBase {
 
 				// Start task queue chain for each kind.
 				Queue queue = QueueFactory.getDefaultQueue();
-				queue.add(tx, TaskOptions.Builder.url("/tasks/Dump.gobo").param(
+				queue.add(tx, TaskOptions.Builder.url("/tasks/dump.gobo").param(
 					"controlKey",
 					KeyFactory.keyToString(childKey)).countdownMillis(10000).method(Method.GET));
 			}
@@ -73,7 +73,7 @@ public class StartController extends AuthSubBase {
 			throw e;
 		}
 
-		return redirect("Started.gobo?docURL="
+		return redirect("started.gobo?docURL="
 			+ response.encodeRedirectURL(createSpreadsheet.getHtmlLink().getHref()));
 	}
 }

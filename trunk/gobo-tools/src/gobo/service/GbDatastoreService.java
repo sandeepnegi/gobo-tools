@@ -8,6 +8,7 @@ import gobo.slim3.DatastoreUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -24,14 +25,13 @@ public class GbDatastoreService {
 
 	public static List<String> getKinds() {
 
-		List<String> kinds = null;
+		List<String> kinds = new ArrayList<String>();
 
 		if (AppEngineUtil.isProduction()) {
 			DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 			List<Entity> list =
 				datastore.prepare(new Query("__Stat_Kind__")).asList(
 					FetchOptions.Builder.withOffset(0));
-			kinds = new ArrayList<String>();
 			for (Entity kind : list) {
 				String kindName = (String) kind.getProperty("kind_name");
 				if ((kindName.startsWith("_") == false)
@@ -40,7 +40,12 @@ public class GbDatastoreService {
 				}
 			}
 		} else {
-			kinds = DatastoreUtil.getKinds();
+			List<String> list = DatastoreUtil.getKinds();
+			for (String kind : list) {
+				if (kind.startsWith("_") == false) {
+					kinds.add(kind);
+				}
+			}
 		}
 
 		return kinds;
@@ -56,7 +61,7 @@ public class GbDatastoreService {
 				datastore.prepare(new Query("__Stat_PropertyType_PropertyName_Kind__")).asList(
 					FetchOptions.Builder.withOffset(0));
 			for (Entity _kind : _list) {
-				//System.out.println(_kind);
+				// System.out.println(_kind);
 				if (_kind.getProperty("kind_name").equals(kind)) {
 					GbProperty gbProperty = new GbProperty();
 					gbProperty.setName((String) _kind.getProperty("property_name"));
@@ -88,7 +93,8 @@ public class GbDatastoreService {
 
 	public void restoreData(String wsTitle, List<GbEntity> data) {
 
-		List<Entity> list = new ArrayList<Entity>();
+		List<Entity> newList = new ArrayList<Entity>();
+		List<Key> orgKeyList = new ArrayList<Key>();
 		for (GbEntity gbEntity : data) {
 
 			// parsing Key
@@ -98,6 +104,7 @@ public class GbDatastoreService {
 				entity = new Entity(wsTitle);
 			} else {
 				entity = new Entity(key);
+				orgKeyList.add(key);
 			}
 
 			// Properties
@@ -109,10 +116,20 @@ public class GbDatastoreService {
 				}
 			}
 			System.out.println(entity);
-			list.add(entity);
+			newList.add(entity);
 		}
-		DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
-		datastoreService.put(list);
+
+		// Merge
+		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+		Map<Key, Entity> orgEntities = ds.get(orgKeyList);
+		for (Entity newEntity : newList) {
+			Key key = newEntity.getKey();
+			if (orgEntities.containsKey(key)) {
+				Entity orgEntity = orgEntities.get(key);
+				newEntity.setPropertiesFrom(orgEntity);
+			}
+		}
+		ds.put(newList);
 		return;
 	}
 
@@ -144,5 +161,4 @@ public class GbDatastoreService {
 		return key;
 	}
 
-	
 }

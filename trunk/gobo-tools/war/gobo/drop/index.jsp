@@ -8,7 +8,7 @@
 </head>
 <body>
 <div>Please select the kind(s) to drop.</div>
-<form action="Start.gobo" method="POST">
+<form action="start.gobo" method="POST">
 <ul>
 <c:forEach items="${list}" var="row">
 <li>
