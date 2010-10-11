@@ -7,7 +7,7 @@
 <title></title>
 </head>
 <body>
-<div style="position:absolute; top:10px; right:10px;"><a href="../logout.gobo">logout</a></div>
+<div style="position:absolute; top:10px; right:10px;"><a href="../index.gobo">Menu</a>&nbsp;<a href="../logout.gobo">logout</a></div>
 <div>Please select a spreadsheet to restore.</div>
 <ul>
 <c:forEach items="${list}" var="row">
