@@ -22,6 +22,7 @@ google.setOnLoadCallback(initialize);
 </script>
 </head>
 <body>
+<div style="position:absolute; top:10px; right:10px;"><a href="../index.gobo">Menu</a>&nbsp;<a href="../logout.gobo">logout</a></div>
 <div>Prease select worksheet(s) to restore.</div>
 <form action="start.gobo" method="POST" id="form1">
 <input type="hidden" name="ssKey" value="${ssKey}" />

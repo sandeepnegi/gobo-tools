@@ -5,10 +5,28 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <title>Drop</title>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load("jquery", "1.4.2");
+function initialize() {
+	$("#checkall").click(function(){
+		$("#form1 input[type='checkbox']").attr('checked', true);
+        return false; 
+	});
+	$("#uncheckall").click(function(){
+		$("#form1 input[type='checkbox']").attr('checked', false);
+        return false; 
+	});
+}
+google.setOnLoadCallback(initialize);
+</script>
 </head>
 <body>
+<div style="position:absolute; top:10px; right:10px;"><a href="../index.gobo">Menu</a>&nbsp;<a href="../logout.gobo">logout</a></div>
 <div>Please select the kind(s) to drop.</div>
-<form action="start.gobo" method="POST">
+<form action="start.gobo" method="POST" id="form1">
+<input type="button" value="Check All" id="checkall" />
+<input type="button" value="Uncheck All" id="uncheckall" />
 <ul>
 <c:forEach items="${list}" var="row">
 <li>
