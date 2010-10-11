@@ -23,7 +23,7 @@ google.setOnLoadCallback(initialize);
 </head>
 <body>
 <div>Prease select worksheet(s) to restore.</div>
-<form action="Start.gobo" method="POST" id="form1">
+<form action="start.gobo" method="POST" id="form1">
 <input type="hidden" name="ssKey" value="${ssKey}" />
 <input type="button" value="Check All" id="checkall" />
 <input type="button" value="Uncheck All" id="uncheckall" />

@@ -25,9 +25,9 @@ background: #ddd;
 <body>
 <h1>Gobo Tools</h1>
 <div style="text-align:center;">
-  <div class="button"><a href="dump/Index.gobo"/>Dump</a></div>
-  <div class="button"><a href="restore/Index.gobo"/>Restore</a></div>
-  <div class="button"><a href="drop/Index.gobo"/>Drop</a></div>
+  <div class="button"><a href="dump/index.gobo"/>Dump</a></div>
+  <div class="button"><a href="restore/index.gobo"/>Restore</a></div>
+  <div class="button"><a href="drop/index.gobo"/>Drop</a></div>
 </div>
 </body>
 </html>

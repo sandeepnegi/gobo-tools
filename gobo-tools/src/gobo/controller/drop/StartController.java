@@ -51,7 +51,7 @@ public class StartController extends ControllerBase {
 
 				// Start task queue chain for each kind.
 				Queue queue = QueueFactory.getDefaultQueue();
-				queue.add(tx, TaskOptions.Builder.url("/tasks/Drop.gobo").param(
+				queue.add(tx, TaskOptions.Builder.url("/tasks/drop.gobo").param(
 					"controlKey",
 					KeyFactory.keyToString(childKey)).method(Method.GET));
 			}
@@ -63,7 +63,7 @@ public class StartController extends ControllerBase {
 			throw e;
 		}
 
-		return redirect("Started.gobo");
+		return redirect("started.gobo");
 	}
 
 }

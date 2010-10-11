@@ -66,7 +66,7 @@ public class DumpController extends ControllerBase {
 
 		// Call the last chain.
 		if ((data == null) || (data.size() == 0)) {
-			queue.add(TaskOptions.Builder.url("/tasks/DumpEnd.gobo").param(
+			queue.add(TaskOptions.Builder.url("/tasks/dumpEnd.gobo").param(
 				"controlKey",
 				KeyFactory.keyToString(controlKey)).method(Method.GET));
 			return null;
@@ -98,7 +98,7 @@ public class DumpController extends ControllerBase {
 		datastore.put(control);
 
 		// Call the next chain.
-		queue.add(TaskOptions.Builder.url("/tasks/Dump.gobo").param(
+		queue.add(TaskOptions.Builder.url("/tasks/dump.gobo").param(
 			"controlKey",
 			KeyFactory.keyToString(controlKey)).method(Method.GET));
 

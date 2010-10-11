@@ -35,7 +35,7 @@ public class DropController extends ControllerBase {
 		List<Entity> keyList = datastore.prepare(new Query(kind).setKeysOnly()).asList(withLimit);
 
 		if ((keyList == null) || (keyList.size() == 0)) {
-			queue.add(TaskOptions.Builder.url("/tasks/DropEnd.gobo").param(
+			queue.add(TaskOptions.Builder.url("/tasks/dropEnd.gobo").param(
 				"controlKey",
 				KeyFactory.keyToString(controlKey)).method(Method.GET));
 			return null;
@@ -54,7 +54,7 @@ public class DropController extends ControllerBase {
 		datastore.put(control);
 
 		// Call the next chain.
-		queue.add(TaskOptions.Builder.url("/tasks/Drop.gobo").param(
+		queue.add(TaskOptions.Builder.url("/tasks/drop.gobo").param(
 			"controlKey",
 			KeyFactory.keyToString(controlKey)).method(Method.GET));
 
