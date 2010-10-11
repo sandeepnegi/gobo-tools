@@ -19,7 +19,7 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
 public class RestoreController extends ControllerBase {
 
-	final Integer RANGE = 100;
+	final Integer RANGE = 50;
 
 	@Override
 	protected String run() throws Exception {

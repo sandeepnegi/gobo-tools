@@ -27,7 +27,7 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
 public class DumpController extends ControllerBase {
 
-	final Integer RANGE = 50;
+	final Integer RANGE = 25;
 
 	@Override
 	protected String run() throws Exception {
