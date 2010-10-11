@@ -155,7 +155,7 @@ public class GbDatastoreService {
 				keyVal = keyVal.replaceAll("\"", "");
 				key = KeyFactory.createKey(key, kind, keyVal);
 			} else {
-				key = KeyFactory.createKey(key, kind, Integer.parseInt(keyVal));
+				key = KeyFactory.createKey(key, kind, Long.parseLong(keyVal));
 			}
 		}
 		return key;
