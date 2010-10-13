@@ -194,6 +194,10 @@ public class GbProperty {
 	 */
 	public Object asDatastoreValue() {
 
+		if (value == null) {
+			return null;
+		}
+		
 		Object val = null;
 		if ((valueType == null) || (valueType.length() == 0)) {
 			val = value;
