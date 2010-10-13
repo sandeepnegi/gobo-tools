@@ -7,6 +7,7 @@ import gobo.slim3.AppEngineUtil;
 import gobo.slim3.DatastoreUtil;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.repackaged.com.google.common.collect.Lists;
 import com.google.apphosting.api.DatastorePb.Schema;
 import com.google.storage.onestore.v3.OnestoreEntity.EntityProto;
 import com.google.storage.onestore.v3.OnestoreEntity.Property;
@@ -115,21 +117,30 @@ public class GbDatastoreService {
 					System.err.println(e.getMessage());
 				}
 			}
-			System.out.println(entity);
+			// System.out.println(entity);
 			newList.add(entity);
 		}
 
 		// Merge
+		List<Entity> mergedList = Lists.newArrayList();
 		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
-		Map<Key, Entity> orgEntities = ds.get(orgKeyList);
+		final Map<Key, Entity> orgEntityMap = ds.get(orgKeyList);
 		for (Entity newEntity : newList) {
-			Key key = newEntity.getKey();
-			if (orgEntities.containsKey(key)) {
-				Entity orgEntity = orgEntities.get(key);
-				newEntity.setPropertiesFrom(orgEntity);
+			if (orgEntityMap.containsKey(newEntity.getKey())) {
+				Entity orgEntity = orgEntityMap.get(newEntity.getKey());
+				final Map<String, Object> newProps = newEntity.getProperties();
+				Iterator<String> it = newProps.keySet().iterator();
+				while (it.hasNext()) {
+					final String newProp = it.next();
+					orgEntity.setProperty(newProp, newProps.get(newProp));
+				}
+				mergedList.add(orgEntity);
+			} else {
+				mergedList.add(newEntity);
 			}
 		}
-		ds.put(newList);
+
+		ds.put(mergedList);
 		return;
 	}
 

@@ -32,33 +32,33 @@ public class GbProperty {
 
 	private Object value;
 
-	protected final static String BOOLEAN = "Boolean";
-	protected final static String STRING = "String";
-	protected final static String BYTE = "Byte";
-	protected final static String SHORT = "Short";
-	protected final static String INTEGER = "Integer";
-	protected final static String LONG = "Long";
-	protected final static String FLOAT = "Float";
-	protected final static String DOUBLE = "Double";
-	protected final static String USER = "User";
-	protected final static String KEY = "Key";
-	protected final static String BLOB = "Blob";
-	protected final static String TEXT = "Text";
-	protected final static String DATE = "Date";
-	protected final static String LINK = "Link";
-	protected final static String SHORT_BLOB = "ShortBlob";
-	protected final static String GEO_PT = "GeoPt";
-	protected final static String CATEGORY = "Category";
-	protected final static String RATING = "Rating";
-	protected final static String PHONE_NUMBER = "PhoneNumber";
-	protected final static String POSTAL_ADDRESS = "PostalAddress";
-	protected final static String EMAIL = "Email";
-	protected final static String IMHANDLE = "IMHandle";
-	protected final static String BLOB_KEY = "BlobKey";
-	protected final static String LIST = "List";
+	public final static String BOOLEAN = "Boolean";
+	public final static String STRING = "String";
+	public final static String BYTE = "Byte";
+	public final static String SHORT = "Short";
+	public final static String INTEGER = "Integer";
+	public final static String LONG = "Long";
+	public final static String FLOAT = "Float";
+	public final static String DOUBLE = "Double";
+	public final static String USER = "User";
+	public final static String KEY = "Key";
+	public final static String BLOB = "Blob";
+	public final static String TEXT = "Text";
+	public final static String DATE = "Date";
+	public final static String LINK = "Link";
+	public final static String SHORT_BLOB = "ShortBlob";
+	public final static String GEO_PT = "GeoPt";
+	public final static String CATEGORY = "Category";
+	public final static String RATING = "Rating";
+	public final static String PHONE_NUMBER = "PhoneNumber";
+	public final static String POSTAL_ADDRESS = "PostalAddress";
+	public final static String EMAIL = "Email";
+	public final static String IMHANDLE = "IMHandle";
+	public final static String BLOB_KEY = "BlobKey";
+	public final static String LIST = "List";
 
-	protected final static String VALUE_SEPARATER = "/";
-	protected final static String NOT_SUPPORTED = "_NOT_SUPPORTED_";
+	public final static String VALUE_SEPARATER = "/";
+	public final static String NOT_SUPPORTED = "_NOT_SUPPORTED_";
 
 	/**
 	 * 
@@ -301,5 +301,4 @@ public class GbProperty {
 	public Object getValue() {
 		return value;
 	}
-
 }
