@@ -10,7 +10,7 @@ import com.google.appengine.api.datastore.Key;
 public class GbEntity {
 
 	private Key key;
-	
+
 	private List<GbProperty> properties = new ArrayList<GbProperty>();
 
 	public Key getKey() {
@@ -20,7 +20,7 @@ public class GbEntity {
 	public void setKey(Key key) {
 		this.key = key;
 	}
-	
+
 	public void setKeyString(String key) {
 		this.key = GbDatastoreService.parseKey(key);
 	}
@@ -37,4 +37,14 @@ public class GbEntity {
 		this.properties.add(gbProperty);
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(key.toString());
+		for (GbProperty prop : properties) {
+			sb.append(":" + prop.toString());
+		}
+		return sb.toString();
+
+	}
 }

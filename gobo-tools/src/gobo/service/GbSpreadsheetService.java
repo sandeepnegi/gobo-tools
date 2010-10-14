@@ -276,6 +276,8 @@ public class GbSpreadsheetService {
 		}
 		worksheetEntry.setColCount(columnSize + 1);
 		worksheetEntry.update();
+
+		System.out.println("Updated worksheet:" + kind);
 	}
 
 	/**
@@ -323,6 +325,7 @@ public class GbSpreadsheetService {
 			}
 			tableEntry.setData(tableData);
 			tableEntry = ss.insert(tableFeedUrl, tableEntry);
+			System.out.println("Inserted table:" + kind);
 		}
 		String[] split = tableEntry.getId().split("/");
 		final String tableId = split[split.length - 1];
@@ -339,6 +342,7 @@ public class GbSpreadsheetService {
 			}
 			URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
 			ss.insert(recordFeedUrl, newEntry);
+			System.out.println("Inserted typeValue row:" + kind);
 		}
 		return tableId;
 	}
@@ -374,6 +378,7 @@ public class GbSpreadsheetService {
 		List<RecordEntry> newRecordList = new ArrayList<RecordEntry>();
 		try {
 			for (GbEntity gbEntity : list) {
+				System.out.println(gbEntity);
 				RecordEntry newEntry = new RecordEntry();
 				final String key = gbEntity.getKey().toString();
 				newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, key));

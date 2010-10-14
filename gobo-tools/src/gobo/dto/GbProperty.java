@@ -197,7 +197,7 @@ public class GbProperty {
 		if (value == null) {
 			return null;
 		}
-		
+
 		Object val = null;
 		if ((valueType == null) || (valueType.length() == 0)) {
 			val = value;
@@ -304,5 +304,12 @@ public class GbProperty {
 	 */
 	public Object getValue() {
 		return value;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(name + "=" + asSpreadsheetValue() + "(" + asSpreadsheetValueType() + ")");
+		return sb.toString();
 	}
 }

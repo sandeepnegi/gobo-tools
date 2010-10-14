@@ -3,10 +3,12 @@ package gobo.service;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import gobo.TestBase;
+import gobo.dto.GbEntity;
 import gobo.dto.GbProperty;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.collect.Lists;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.data.docs.DocumentListEntry;
@@ -88,12 +91,125 @@ public class GbSpreadsheetServiceTest extends TestBase {
 	@Test
 	public void updateWorksheetTest() throws Exception {
 
+		List<String> kindList = new ArrayList<String>();
+		for (int i = 0; i < 10; i++) {
+			kindList.add("TestKind" + i);
+		}
+		String[] kinds = kindList.toArray(new String[0]);
+		List<GbProperty> propList = getPropList();
+		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
+		try {
+			for (int i = 0; i < kinds.length; i++) {
+				goboService.updateWorksheetSize(spreadsheet.getKey(), kinds[i], propList.size());
+				String tableId =
+					goboService.createTableInWorksheet(spreadsheet.getKey(), kinds[i], propList);
+				assertThat(tableId, is(String.valueOf(i)));
+			}
+		} finally {
+			deleteSpreadsheet(spreadsheet);
+		}
+	}
+
+	@Test
+	public void updateWorksheetTwiceForRetryTest() throws Exception {
+
 		String[] kinds = new String[] { "TestKind1" };
+		List<GbProperty> propList = getPropList();
+		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
+		try {
+
+			goboService.updateWorksheetSize(spreadsheet.getKey(), kinds[0], propList.size());
+			goboService.createTableInWorksheet(spreadsheet.getKey(), kinds[0], propList);
+			goboService.updateWorksheetSize(spreadsheet.getKey(), kinds[0], propList.size());
+			goboService.createTableInWorksheet(spreadsheet.getKey(), kinds[0], propList);
+
+		} finally {
+			deleteSpreadsheet(spreadsheet);
+		}
+	}
+
+	@Test
+	public void dumpAndGetDataTest() throws Exception {
+
+		List<String> kindList = new ArrayList<String>();
+		for (int i = 0; i < 3; i++) {
+			kindList.add("TestKind" + i);
+		}
+		String[] kinds = kindList.toArray(new String[0]);
+
+		List<GbProperty> propList = getPropList();
+		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
+		String ssKey = spreadsheet.getKey();
+		try {
+			for (int i = 0; i < kinds.length; i++) {
+				goboService.updateWorksheetSize(ssKey, kinds[i], propList.size());
+				String tableId = goboService.createTableInWorksheet(ssKey, kinds[i], propList);
+				assertThat(tableId, is(String.valueOf(i)));
+			}
+
+			for (int i = 0; i < kinds.length; i++) {
+				List<GbEntity> entityList = getEntityList(kinds[i]);
+				goboService.dumpData(ssKey, kinds[i], String.valueOf(i), entityList);
+			}
+			for (int i = 0; i < kinds.length; i++) {
+				List<GbEntity> dataOrNull = goboService.getDataOrNull(ssKey, kinds[i], 3, 10);
+				System.out.println(dataOrNull);
+			}
+
+		} finally {
+			deleteSpreadsheet(spreadsheet);
+		}
+	}
+
+	SpreadsheetEntry createSpreadsheet(String[] kinds) {
+		goboService = new GbSpreadsheetService(authSubToken);
+		try {
+			return goboService.createSpreadsheet(Arrays.asList(kinds));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	void deleteSpreadsheet(SpreadsheetEntry testSpreadsheet) {
+		try {
+			final String createdEntiry = testSpreadsheet.getTitle().getPlainText();
+			DocsService client = new DocsService("yourCo-yourAppName-v1");
+			client.setAuthSubToken(authSubToken);
+			URL feedUri = new URL("https://docs.google.com/feeds/default/private/full/");
+			DocumentListFeed feed = client.getFeed(feedUri, DocumentListFeed.class);
+			for (DocumentListEntry entry : feed.getEntries()) {
+				final String searchedEntiryTitle = entry.getTitle().getPlainText();
+				if (createdEntiry.equals(searchedEntiryTitle)) {
+					entry.delete();
+					System.out.println("deleted file:" + searchedEntiryTitle);
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	List<GbEntity> getEntityList(String kindName) {
+
+		List<GbEntity> list = Lists.newArrayList();
+		for (int i = 0; i < 10; i++) {
+			GbEntity entity = new GbEntity();
+			entity.setKey(KeyFactory.createKey(kindName, i + 1));
+			entity.setProperties(getPropList());
+			list.add(entity);
+		}
+		return list;
+	}
+
+	List<GbProperty> getPropList() {
+
 		List<GbProperty> propList = Lists.newArrayList();
 
 		GbProperty prop1 = new GbProperty();
 		prop1.setName("prop1");
-		prop1.setValue(new String());
+		prop1.setValue(new String("a"));
 		propList.add(prop1);
 
 		GbProperty prop2 = new GbProperty();
@@ -105,45 +221,6 @@ public class GbSpreadsheetServiceTest extends TestBase {
 		prop3.setName("prop3");
 		prop3.setValue(new Boolean(true));
 		propList.add(prop3);
-
-		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
-		try {
-			goboService.updateWorksheetSize(spreadsheet.getKey(), kinds[0], propList.size());
-			String tableId =
-				goboService.createTableInWorksheet(spreadsheet.getKey(), kinds[0], propList);
-			assertThat(tableId, is("0"));
-		} finally {
-			deleteSpreadsheet(spreadsheet);
-		}
-	}
-
-	private SpreadsheetEntry createSpreadsheet(String[] kinds) {
-		goboService = new GbSpreadsheetService(authSubToken);
-		try {
-			return goboService.createSpreadsheet(Arrays.asList(kinds));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private void deleteSpreadsheet(SpreadsheetEntry testSpreadsheet) {
-		try {
-			final String createdEntiry = testSpreadsheet.getTitle().getPlainText();
-			DocsService client = new DocsService("yourCo-yourAppName-v1");
-			client.setAuthSubToken(authSubToken);
-			URL feedUri = new URL("https://docs.google.com/feeds/default/private/full/");
-			DocumentListFeed feed = client.getFeed(feedUri, DocumentListFeed.class);
-			for (DocumentListEntry entry : feed.getEntries()) {
-				final String searchedEntiryTitle = entry.getTitle().getPlainText();
-				if (createdEntiry.equals(searchedEntiryTitle)) {
-					System.out.println("deleting file:" + searchedEntiryTitle);
-					entry.delete();
-					break;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		return propList;
 	}
 }
