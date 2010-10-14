@@ -1,0 +1,13 @@
+#djUnit Plugin Settings
+#Thu Oct 14 18:55:07 JST 2010
+CoverageIncludedPatterns=gobo.*;
+VirtualMockIgnoreLibrary=false
+CoverageExcludedPatterns=
+UseMarker=true
+UseVirtualMock=false
+UseCoverage=true
+BytecodeLibrary=ASM
+VirtualMockNotIgnorePatterns=
+UseNoverify=false
+CoverageWorkingDirectory=/test/WEB-INF
+CoverageReportCharset=
