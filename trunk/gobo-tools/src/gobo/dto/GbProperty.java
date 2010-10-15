@@ -140,11 +140,12 @@ public class GbProperty {
 					+ VALUE_SEPARATER
 					+ user.getFederatedIdentity();
 		} else if (value instanceof Blob) {
-			// Blob column is not contained in GbDatastoreService#getProperties.
-			return null;
+			// Blob column is NOT contained in GbDatastoreService#getProperties.
+			// return null;
+			val = NOT_SUPPORTED;
 		} else if (value instanceof Text) {
-			val = ((Text) value).getValue();
-			// val = NOT_SUPPORTED;
+			// val = ((Text) value).getValue();
+			val = NOT_SUPPORTED;
 		} else if (value instanceof Date) {
 			val = String.valueOf(((Date) value).getTime());
 		} else if (value instanceof Link) {
@@ -217,8 +218,8 @@ public class GbProperty {
 		} else if (valueType.equals(BLOB)) {
 			throw new RuntimeException("Blob is not supported.");
 		} else if (valueType.equals(TEXT)) {
-			// throw new RuntimeException("Text is not supported.");
-			val = new Text((String) value);
+			//val = new Text((String) value);
+			throw new RuntimeException("Text is not supported.");
 		} else if (valueType.equals(DATE)) {
 			val = new Date(Long.parseLong((String) value));
 		} else if (valueType.equals(LINK)) {
