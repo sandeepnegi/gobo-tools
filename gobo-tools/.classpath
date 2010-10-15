@@ -12,6 +12,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-docs-3.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/gdata-media-1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang-2.5.jar"/>
+	<classpathentry kind="lib" path="lib/slim3-1.0.5.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="var" path="AppEngineSDK/lib/impl/appengine-api-labs.jar"/>
