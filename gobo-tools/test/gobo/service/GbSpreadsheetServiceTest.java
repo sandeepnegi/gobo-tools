@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import gobo.TestBase;
 import gobo.dto.GbEntity;
 import gobo.dto.GbProperty;
+import gobo.util.DataUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,8 +19,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.repackaged.com.google.common.collect.Lists;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.data.docs.DocumentListEntry;
 import com.google.gdata.data.docs.DocumentListFeed;
@@ -96,7 +95,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 			kindList.add("TestKind" + i);
 		}
 		String[] kinds = kindList.toArray(new String[0]);
-		List<GbProperty> propList = getPropList();
+		List<GbProperty> propList = DataUtil.getPropList();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		try {
 			for (int i = 0; i < kinds.length; i++) {
@@ -114,7 +113,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 	public void updateWorksheetTwiceForRetryTest() throws Exception {
 
 		String[] kinds = new String[] { "TestKind1" };
-		List<GbProperty> propList = getPropList();
+		List<GbProperty> propList = DataUtil.getPropList();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		try {
 
@@ -137,7 +136,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 		}
 		String[] kinds = kindList.toArray(new String[0]);
 
-		List<GbProperty> propList = getPropList();
+		List<GbProperty> propList = DataUtil.getPropList();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		String ssKey = spreadsheet.getKey();
 		try {
@@ -148,7 +147,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 			}
 
 			for (int i = 0; i < kinds.length; i++) {
-				List<GbEntity> entityList = getEntityList(kinds[i]);
+				List<GbEntity> entityList = DataUtil.getEntityList(kinds[i]);
 				goboService.dumpData(ssKey, kinds[i], String.valueOf(i), entityList);
 			}
 			for (int i = 0; i < kinds.length; i++) {
@@ -191,36 +190,4 @@ public class GbSpreadsheetServiceTest extends TestBase {
 		}
 	}
 
-	List<GbEntity> getEntityList(String kindName) {
-
-		List<GbEntity> list = Lists.newArrayList();
-		for (int i = 0; i < 10; i++) {
-			GbEntity entity = new GbEntity();
-			entity.setKey(KeyFactory.createKey(kindName, i + 1));
-			entity.setProperties(getPropList());
-			list.add(entity);
-		}
-		return list;
-	}
-
-	List<GbProperty> getPropList() {
-
-		List<GbProperty> propList = Lists.newArrayList();
-
-		GbProperty prop1 = new GbProperty();
-		prop1.setName("prop1");
-		prop1.setValue(new String("a"));
-		propList.add(prop1);
-
-		GbProperty prop2 = new GbProperty();
-		prop2.setName("prop2");
-		prop2.setValue(new Long(1));
-		propList.add(prop2);
-
-		GbProperty prop3 = new GbProperty();
-		prop3.setName("prop3");
-		prop3.setValue(new Boolean(true));
-		propList.add(prop3);
-		return propList;
-	}
 }

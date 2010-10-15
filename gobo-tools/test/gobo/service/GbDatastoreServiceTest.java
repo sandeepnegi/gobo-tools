@@ -4,9 +4,8 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import gobo.TestBase;
 import gobo.dto.GbEntity;
-import gobo.dto.GbProperty;
+import gobo.util.DataUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -15,23 +14,21 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 
 public class GbDatastoreServiceTest extends TestBase {
 
-	private static final String TEST_KIND = "TestKind";
 
 	@Test
 	public void restoreOnce() {
 
 		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list = prepare1();
-		ds.restoreData(TEST_KIND, list);
+		List<GbEntity> list = DataUtil.prepare1();
+		ds.restoreData(DataUtil.TEST_KIND, list);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
-			datastore.prepare(new Query(TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
+			datastore.prepare(new Query(DataUtil.TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
 
 		assertThat(asList.size(), is(5));
 
@@ -60,15 +57,15 @@ public class GbDatastoreServiceTest extends TestBase {
 	public void restoreTwice() {
 
 		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list = prepare1();
-		ds.restoreData(TEST_KIND, list);
+		List<GbEntity> list = DataUtil.prepare1();
+		ds.restoreData(DataUtil.TEST_KIND, list);
 
-		List<GbEntity> list2 = prepare2();
-		ds.restoreData(TEST_KIND, list2);
+		List<GbEntity> list2 = DataUtil.prepare2();
+		ds.restoreData(DataUtil.TEST_KIND, list2);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
-			datastore.prepare(new Query(TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
+			datastore.prepare(new Query(DataUtil.TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
 		assertThat(asList.size(), is(8));
 
 		assertThat(asList.get(0).getProperties().size(), is(2));
@@ -109,15 +106,15 @@ public class GbDatastoreServiceTest extends TestBase {
 	public void restoreWithDifferentProp() {
 
 		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list1 = prepare1();
-		ds.restoreData(TEST_KIND, list1);
+		List<GbEntity> list1 = DataUtil.prepare1();
+		ds.restoreData(DataUtil.TEST_KIND, list1);
 
-		List<GbEntity> list3 = prepare3();
-		ds.restoreData(TEST_KIND, list3);
+		List<GbEntity> list3 = DataUtil.prepare3();
+		ds.restoreData(DataUtil.TEST_KIND, list3);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
-			datastore.prepare(new Query(TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
+			datastore.prepare(new Query(DataUtil.TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
 
 		assertThat(asList.size(), is(5));
 		assertThat(asList.get(0).getProperties().size(), is(3));
@@ -151,15 +148,15 @@ public class GbDatastoreServiceTest extends TestBase {
 	public void restoreWithNullValue() {
 
 		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list1 = prepare1();
-		ds.restoreData(TEST_KIND, list1);
+		List<GbEntity> list1 = DataUtil.prepare1();
+		ds.restoreData(DataUtil.TEST_KIND, list1);
 
-		List<GbEntity> list4 = prepare4();
-		ds.restoreData(TEST_KIND, list4);
+		List<GbEntity> list4 = DataUtil.prepare4();
+		ds.restoreData(DataUtil.TEST_KIND, list4);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
-			datastore.prepare(new Query(TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
+			datastore.prepare(new Query(DataUtil.TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
 
 		System.out.println(asList);
 		
@@ -191,107 +188,4 @@ public class GbDatastoreServiceTest extends TestBase {
 
 	}
 
-	List<GbEntity> prepare1() {
-
-		List<GbEntity> list = new ArrayList<GbEntity>();
-		for (int i = 1; i <= 5; i++) {
-
-			GbEntity entity = new GbEntity();
-			entity.setKey(KeyFactory.createKey(TEST_KIND, i));
-
-			GbProperty property1 = new GbProperty();
-			property1.setName("prop1");
-			property1.setValueType(GbProperty.STRING);
-			property1.setValue("prepare1_" + i);
-			entity.addProperty(property1);
-
-			GbProperty property2 = new GbProperty();
-			property2.setName("prop2");
-			property2.setValueType(GbProperty.LONG);
-			property2.setValue(String.valueOf("10" + i));
-			entity.addProperty(property2);
-
-			list.add(entity);
-		}
-		return list;
-	}
-
-	List<GbEntity> prepare2() {
-
-		List<GbEntity> list = new ArrayList<GbEntity>();
-		for (int i = 1; i <= 5; i++) {
-
-			GbEntity entity = new GbEntity();
-			entity.setKey(KeyFactory.createKey(TEST_KIND, i + 3));
-
-			GbProperty property1 = new GbProperty();
-			property1.setName("prop1");
-			property1.setValueType(GbProperty.STRING);
-			property1.setValue("prepare2_" + i);
-			entity.addProperty(property1);
-
-			GbProperty property2 = new GbProperty();
-			property2.setName("prop2");
-			property2.setValueType(GbProperty.LONG);
-			property2.setValue(String.valueOf("20" + i));
-			entity.addProperty(property2);
-
-			list.add(entity);
-		}
-		return list;
-	}
-
-	List<GbEntity> prepare3() {
-
-		List<GbEntity> list = new ArrayList<GbEntity>();
-		for (int i = 1; i <= 5; i++) {
-
-			GbEntity entity = new GbEntity();
-			entity.setKey(KeyFactory.createKey(TEST_KIND, i));
-
-			GbProperty property1 = new GbProperty();
-			property1.setName("prop3");
-			property1.setValueType(GbProperty.STRING);
-			property1.setValue("prepare3_" + i);
-			entity.addProperty(property1);
-
-			GbProperty property2 = new GbProperty();
-			property2.setName("prop2");
-			property2.setValueType(GbProperty.LONG);
-			property2.setValue(String.valueOf("30" + i));
-			entity.addProperty(property2);
-
-			list.add(entity);
-		}
-		return list;
-	}
-
-	List<GbEntity> prepare4() {
-
-		List<GbEntity> list = new ArrayList<GbEntity>();
-		for (int i = 1; i <= 5; i++) {
-
-			GbEntity entity = new GbEntity();
-			entity.setKey(KeyFactory.createKey(TEST_KIND, i));
-
-			GbProperty property1 = new GbProperty();
-			property1.setName("prop3");
-			property1.setValueType(GbProperty.STRING);
-			property1.setValue("prepare4_" + i);
-			entity.addProperty(property1);
-
-			GbProperty property2 = new GbProperty();
-			property2.setName("prop2");
-			property2.setValueType(GbProperty.LONG);
-			if (i == 3) {
-				property2.setValue(null);
-			} else {
-				property2.setValue(String.valueOf("40" + i));
-			}
-			entity.addProperty(property2);
-
-			list.add(entity);
-		}
-		return list;
-	}
 }

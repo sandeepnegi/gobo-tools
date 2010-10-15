@@ -11,8 +11,9 @@ public class IndexControllerTest extends TestBase {
 
 	@Test
 	public void runTest() throws Exception {
-		
+
 		ControllerTester tester = new ControllerTester();
 		String run = tester.start("/index");
-		assertNotNull(run);	}
+		assertNotNull(run);
+	}
 }
