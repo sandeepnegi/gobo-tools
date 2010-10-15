@@ -12,6 +12,11 @@ public class ControllerTester {
 	public HttpServletResponse response;
 	public HttpServletRequest request;
 
+	public ControllerTester() {
+		this.request = new MockHttpServletRequest(new MockServletContext());
+		this.response = new MockHttpServletResponse();
+	}
+
 	@SuppressWarnings("unchecked")
 	public String start(String uri) throws Exception {
 
@@ -27,10 +32,14 @@ public class ControllerTester {
 		Class clazz = Class.forName(fullName);
 		ControllerBase test = (ControllerBase) clazz.newInstance();
 
-		test.request = new MockHttpServletRequest(new MockServletContext());
-		test.response = new MockHttpServletResponse();
+		test.request = this.request;
+		test.response = this.response;
 
 		String run = test.run();
+
+		this.request = test.request;
+		this.response = test.response;
+
 		return run;
 	}
 
