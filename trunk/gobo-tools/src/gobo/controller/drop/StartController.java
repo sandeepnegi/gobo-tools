@@ -35,7 +35,7 @@ public class StartController extends ControllerBase {
 			Key controlId = datastore.allocateIds("drop", 1).getStart();
 			List<Entity> list = new ArrayList<Entity>();
 			Queue queue = QueueFactory.getDefaultQueue();
-			List<TaskOptions> tasks = Lists.newArrayList();
+			List<TaskOptions> taskList = Lists.newArrayList();
 			for (int i = 0; i < kinds.length; i++) {
 
 				Key childKey = KeyFactory.createKey(controlId, GbControl.NAME, kinds[i]);
@@ -49,16 +49,20 @@ public class StartController extends ControllerBase {
 				list.add(control);
 
 				// Start task queue chain for each kind.
-				tasks.add(TaskOptions.Builder.url("/tasks/drop.gobo").param(
+				taskList.add(TaskOptions.Builder.url("/tasks/drop.gobo").param(
 					"controlKey",
 					KeyFactory.keyToString(childKey)).method(Method.GET));
 			}
 			putKeys = datastore.put(list);
-			queue.add(tasks);
+			queue.add(taskList);
 
 		} catch (Exception e) {
 			if (putKeys != null) {
-				datastore.delete(putKeys);
+				try {
+					datastore.delete(putKeys);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
 			}
 			throw e;
 		}
