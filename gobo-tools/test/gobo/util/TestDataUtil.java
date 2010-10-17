@@ -9,11 +9,11 @@ import java.util.List;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.collect.Lists;
 
-public class DataUtil {
+public class TestDataUtil {
 
 	public static final String TEST_KIND = "TestKind";
 
-	public static List<GbEntity> prepare1() {
+	public static List<GbEntity> testEntity1() {
 
 		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (int i = 1; i <= 5; i++) {
@@ -38,7 +38,7 @@ public class DataUtil {
 		return list;
 	}
 
-	public static List<GbEntity> prepare2() {
+	public static List<GbEntity> testEntity2() {
 
 		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (int i = 1; i <= 5; i++) {
@@ -63,7 +63,7 @@ public class DataUtil {
 		return list;
 	}
 
-	public static List<GbEntity> prepare3() {
+	public static List<GbEntity> testEntity3() {
 
 		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (int i = 1; i <= 5; i++) {
@@ -88,7 +88,7 @@ public class DataUtil {
 		return list;
 	}
 
-	public static List<GbEntity> prepare4() {
+	public static List<GbEntity> testEntity4() {
 
 		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (int i = 1; i <= 5; i++) {
@@ -117,19 +117,19 @@ public class DataUtil {
 		return list;
 	}
 
-	public static List<GbEntity> getEntityList(String kindName) {
+	public static List<GbEntity> testEntity5(String kindName) {
 
 		List<GbEntity> list = Lists.newArrayList();
 		for (int i = 0; i < 10; i++) {
 			GbEntity entity = new GbEntity();
 			entity.setKey(KeyFactory.createKey(kindName, i + 1));
-			entity.setProperties(getPropList());
+			entity.setProperties(testPropList1());
 			list.add(entity);
 		}
 		return list;
 	}
 
-	public static List<GbProperty> getPropList() {
+	public static List<GbProperty> testPropList1() {
 
 		List<GbProperty> propList = Lists.newArrayList();
 

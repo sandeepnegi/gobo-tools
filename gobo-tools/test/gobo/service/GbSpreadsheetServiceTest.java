@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import gobo.TestBase;
 import gobo.dto.GbEntity;
 import gobo.dto.GbProperty;
-import gobo.util.DataUtil;
+import gobo.util.TestDataUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -95,7 +95,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 			kindList.add("TestKind" + i);
 		}
 		String[] kinds = kindList.toArray(new String[0]);
-		List<GbProperty> propList = DataUtil.getPropList();
+		List<GbProperty> propList = TestDataUtil.testPropList1();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		try {
 			for (int i = 0; i < kinds.length; i++) {
@@ -113,7 +113,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 	public void updateWorksheetTwiceForRetryTest() throws Exception {
 
 		String[] kinds = new String[] { "TestKind1" };
-		List<GbProperty> propList = DataUtil.getPropList();
+		List<GbProperty> propList = TestDataUtil.testPropList1();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		try {
 
@@ -136,7 +136,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 		}
 		String[] kinds = kindList.toArray(new String[0]);
 
-		List<GbProperty> propList = DataUtil.getPropList();
+		List<GbProperty> propList = TestDataUtil.testPropList1();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		String ssKey = spreadsheet.getKey();
 		try {
@@ -147,7 +147,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 			}
 
 			for (int i = 0; i < kinds.length; i++) {
-				List<GbEntity> entityList = DataUtil.getEntityList(kinds[i]);
+				List<GbEntity> entityList = TestDataUtil.testEntity5(kinds[i]);
 				goboService.dumpData(ssKey, kinds[i], String.valueOf(i), entityList);
 			}
 			for (int i = 0; i < kinds.length; i++) {

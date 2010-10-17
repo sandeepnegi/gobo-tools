@@ -1,16 +1,13 @@
 package gobo;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slim3.tester.MockHttpServletRequest;
 import org.slim3.tester.MockHttpServletResponse;
 import org.slim3.tester.MockServletContext;
 
 public class ControllerTester {
 
-	public HttpServletResponse response;
-	public HttpServletRequest request;
+	public MockHttpServletResponse response;
+	public MockHttpServletRequest request;
 
 	public ControllerTester() {
 		this.request = new MockHttpServletRequest(new MockServletContext());
@@ -37,8 +34,8 @@ public class ControllerTester {
 
 		String run = test.run();
 
-		this.request = test.request;
-		this.response = test.response;
+		this.request = (MockHttpServletRequest) test.request;
+		this.response = (MockHttpServletResponse) test.response;
 
 		return run;
 	}

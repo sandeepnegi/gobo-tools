@@ -4,7 +4,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import gobo.TestBase;
 import gobo.dto.GbEntity;
-import gobo.util.DataUtil;
+import gobo.util.TestDataUtil;
 
 import java.util.List;
 
@@ -18,17 +18,17 @@ import com.google.appengine.api.datastore.Query;
 
 public class GbDatastoreServiceTest extends TestBase {
 
-
 	@Test
 	public void restoreOnce() {
 
 		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list = DataUtil.prepare1();
-		ds.restoreData(DataUtil.TEST_KIND, list);
+		List<GbEntity> list = TestDataUtil.testEntity1();
+		ds.restoreData(TestDataUtil.TEST_KIND, list);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
-			datastore.prepare(new Query(DataUtil.TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
+			datastore.prepare(new Query(TestDataUtil.TEST_KIND)).asList(
+				FetchOptions.Builder.withDefaults());
 
 		assertThat(asList.size(), is(5));
 
@@ -57,15 +57,16 @@ public class GbDatastoreServiceTest extends TestBase {
 	public void restoreTwice() {
 
 		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list = DataUtil.prepare1();
-		ds.restoreData(DataUtil.TEST_KIND, list);
+		List<GbEntity> list = TestDataUtil.testEntity1();
+		ds.restoreData(TestDataUtil.TEST_KIND, list);
 
-		List<GbEntity> list2 = DataUtil.prepare2();
-		ds.restoreData(DataUtil.TEST_KIND, list2);
+		List<GbEntity> list2 = TestDataUtil.testEntity2();
+		ds.restoreData(TestDataUtil.TEST_KIND, list2);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
-			datastore.prepare(new Query(DataUtil.TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
+			datastore.prepare(new Query(TestDataUtil.TEST_KIND)).asList(
+				FetchOptions.Builder.withDefaults());
 		assertThat(asList.size(), is(8));
 
 		assertThat(asList.get(0).getProperties().size(), is(2));
@@ -106,15 +107,16 @@ public class GbDatastoreServiceTest extends TestBase {
 	public void restoreWithDifferentProp() {
 
 		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list1 = DataUtil.prepare1();
-		ds.restoreData(DataUtil.TEST_KIND, list1);
+		List<GbEntity> list1 = TestDataUtil.testEntity1();
+		ds.restoreData(TestDataUtil.TEST_KIND, list1);
 
-		List<GbEntity> list3 = DataUtil.prepare3();
-		ds.restoreData(DataUtil.TEST_KIND, list3);
+		List<GbEntity> list3 = TestDataUtil.testEntity3();
+		ds.restoreData(TestDataUtil.TEST_KIND, list3);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
-			datastore.prepare(new Query(DataUtil.TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
+			datastore.prepare(new Query(TestDataUtil.TEST_KIND)).asList(
+				FetchOptions.Builder.withDefaults());
 
 		assertThat(asList.size(), is(5));
 		assertThat(asList.get(0).getProperties().size(), is(3));
@@ -148,18 +150,19 @@ public class GbDatastoreServiceTest extends TestBase {
 	public void restoreWithNullValue() {
 
 		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list1 = DataUtil.prepare1();
-		ds.restoreData(DataUtil.TEST_KIND, list1);
+		List<GbEntity> list1 = TestDataUtil.testEntity1();
+		ds.restoreData(TestDataUtil.TEST_KIND, list1);
 
-		List<GbEntity> list4 = DataUtil.prepare4();
-		ds.restoreData(DataUtil.TEST_KIND, list4);
+		List<GbEntity> list4 = TestDataUtil.testEntity4();
+		ds.restoreData(TestDataUtil.TEST_KIND, list4);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
-			datastore.prepare(new Query(DataUtil.TEST_KIND)).asList(FetchOptions.Builder.withDefaults());
+			datastore.prepare(new Query(TestDataUtil.TEST_KIND)).asList(
+				FetchOptions.Builder.withDefaults());
 
 		System.out.println(asList);
-		
+
 		assertThat(asList.size(), is(5));
 		assertThat(asList.get(0).getProperties().size(), is(3));
 		assertThat(asList.get(0).getProperty("prop1").toString(), is("prepare1_1"));
