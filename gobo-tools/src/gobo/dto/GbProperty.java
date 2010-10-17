@@ -218,7 +218,7 @@ public class GbProperty {
 		} else if (valueType.equals(BLOB)) {
 			throw new RuntimeException("Blob is not supported.");
 		} else if (valueType.equals(TEXT)) {
-			//val = new Text((String) value);
+			// val = new Text((String) value);
 			throw new RuntimeException("Text is not supported.");
 		} else if (valueType.equals(DATE)) {
 			val = new Date(Long.parseLong((String) value));

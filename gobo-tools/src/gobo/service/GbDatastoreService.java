@@ -7,9 +7,11 @@ import gobo.slim3.AppEngineUtil;
 import gobo.slim3.DatastoreUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -62,12 +64,19 @@ public class GbDatastoreService {
 			List<Entity> _list =
 				datastore.prepare(new Query("__Stat_PropertyType_PropertyName_Kind__")).asList(
 					FetchOptions.Builder.withOffset(0));
+			List<String> propNameList = Lists.newArrayList();
 			for (Entity _kind : _list) {
-				// System.out.println(_kind);
 				if (_kind.getProperty("kind_name").equals(kind)) {
+					String propName = (String) _kind.getProperty("property_name");
 					GbProperty gbProperty = new GbProperty();
-					gbProperty.setName((String) _kind.getProperty("property_name"));
-					list.add(gbProperty);
+					gbProperty.setName(propName);
+
+					// Different type and same name properties are returned in
+					// production! and here comparing only property_name.
+					if (propNameList.contains(propName) == false) {
+						list.add(gbProperty);
+						propNameList.add(propName);
+					}
 				}
 			}
 
@@ -90,6 +99,7 @@ public class GbDatastoreService {
 				list.add(gbProperty);
 			}
 		}
+		System.out.println(list);
 		return list;
 	}
 
