@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <%@page pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
@@ -17,13 +18,24 @@ function initialize() {
 		$("#form1 input[type='checkbox']").attr('checked', false);
         return false; 
 	});
+	$("#form1").submit(function() {
+		if($("#form1 input[type='checkbox']:checked").length == 0) {
+			alert("Please select checkbox at least one.");
+			return false;
+		}
+		return true;
+	});
 }
 google.setOnLoadCallback(initialize);
 </script>
+<link rel="stylesheet" href="/gobo/css/global.css" />
 </head>
 <body>
+<h1>Gobo Tools</h1>
+<h2>Restore</h2>
 <div style="position:absolute; top:10px; right:10px;"><a href="../index.gobo">Menu</a>&nbsp;<a href="../logout.gobo">logout</a></div>
-<div>Prease select worksheet(s) to restore.</div>
+<div id="main">
+<div id="msg">Prease select worksheet(s) to restore.</div>
 <form action="start.gobo" method="POST" id="form1">
 <input type="hidden" name="ssKey" value="${ssKey}" />
 <input type="button" value="Check All" id="checkall" />
@@ -38,5 +50,6 @@ google.setOnLoadCallback(initialize);
 </ul>
 <input type="submit" value="execute" />
 </form>
+</div>
 </body>
 </html>
