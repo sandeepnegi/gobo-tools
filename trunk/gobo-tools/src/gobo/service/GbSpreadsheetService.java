@@ -383,7 +383,6 @@ public class GbSpreadsheetService {
 			valueTypeRowMap.put(field.getName(), field);
 			if (field.getValue().equals(VALUE_TYPE_NOT_SET)) {
 				valueTypeNotSet = true;
-				logger.info("TypeValue row in :" + kind + " is not filled in.");
 			}
 		}
 
