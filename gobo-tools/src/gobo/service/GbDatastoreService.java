@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -24,6 +25,8 @@ import com.google.storage.onestore.v3.OnestoreEntity.EntityProto;
 import com.google.storage.onestore.v3.OnestoreEntity.Property;
 
 public class GbDatastoreService {
+
+	private static final Logger logger = Logger.getLogger(GbDatastoreService.class.getName());
 
 	public static List<String> getKinds() {
 
@@ -101,7 +104,7 @@ public class GbDatastoreService {
 			}
 
 		}
-		System.out.println(list);
+		logger.fine(list.toString());
 		return list;
 	}
 
@@ -126,10 +129,10 @@ public class GbDatastoreService {
 				try {
 					entity.setProperty(gbProperty.getName(), gbProperty.asDatastoreValue());
 				} catch (RuntimeException e) {
-					System.err.println(e.getMessage());
+					logger.warning(e.getMessage());
 				}
 			}
-			// System.out.println(entity);
+			logger.fine(entity.toString());
 			newList.add(entity);
 		}
 

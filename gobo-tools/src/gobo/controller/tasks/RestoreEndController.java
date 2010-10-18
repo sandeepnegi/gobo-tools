@@ -1,5 +1,7 @@
 package gobo.controller.tasks;
 
+import java.util.logging.Logger;
+
 import gobo.TaskQueueBase;
 import gobo.model.GbControl;
 import gobo.service.GbMailService;
@@ -10,6 +12,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 
 public class RestoreEndController extends TaskQueueBase {
+
+	private static final Logger logger = Logger.getLogger(RestoreEndController.class.getName());
 
 	@Override
 	protected String runTask() throws Exception {
@@ -25,9 +29,12 @@ public class RestoreEndController extends TaskQueueBase {
 			final long controlId = parentKey.getId();
 			Object reportTo = gbControl.getProperty(GbControl.REPORT_TO);
 			if (reportTo != null) {
-				GbMailService.sendMail((Email) reportTo, controlId, "Restore");
+				GbMailService.sendMail(
+					(Email) reportTo,
+					controlId,
+					"[Restore] successfully completed.");
 			}
-			System.out.println("finished");
+			logger.info("finished");
 		}
 
 		// Delete control row.

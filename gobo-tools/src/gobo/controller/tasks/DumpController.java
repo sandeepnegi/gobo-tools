@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.Entity;
@@ -29,6 +30,8 @@ public class DumpController extends TaskQueueBase {
 
 	final Integer RANGE = 25;
 
+	private static final Logger logger = Logger.getLogger(DumpController.class.getName());
+
 	@Override
 	protected String runTask() throws Exception {
 
@@ -40,7 +43,7 @@ public class DumpController extends TaskQueueBase {
 		final String cursor = (String) control.getProperty(GbControl.CURSOR);
 		final Long rowNum = (Long) control.getProperty(GbControl.COUNT);
 		final String token = (String) control.getProperty(GbControl.AUTH_SUB_TOKEN);
-		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
+		logger.info("Dump:kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
 		// Prepare table only at first chain.

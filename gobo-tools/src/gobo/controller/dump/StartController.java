@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
@@ -25,6 +26,8 @@ import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
 
 public class StartController extends AuthSubBase {
 
+	private static final Logger logger = Logger.getLogger(StartController.class.getName());
+
 	@Override
 	protected String runAuth() throws Exception {
 
@@ -37,7 +40,7 @@ public class StartController extends AuthSubBase {
 		GbSpreadsheetService su = new GbSpreadsheetService(token);
 		SpreadsheetEntry createSpreadsheet = su.createSpreadsheet(Arrays.asList(kinds));
 		final String ssKey = createSpreadsheet.getKey();
-		System.out.println("ssKey=" + ssKey);
+		logger.fine("ssKey=" + ssKey);
 
 		List<Key> putKeys = null;
 		try {
