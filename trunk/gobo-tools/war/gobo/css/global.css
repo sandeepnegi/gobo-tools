@@ -1,7 +1,7 @@
 @CHARSET "utf-8";
 
 html, body {
-	color:#ccc;
+	color:#666;
 }
 h1 {
 	font-size:25px;
@@ -9,8 +9,11 @@ h1 {
 }
 h2 {
 	font-size:20px;
-	margin:0 0 30px;
+	margin:0 0 10px 15px;
 }
 img {
 	border:0;
+}
+#main {
+	margin: 20px 0 0 30px;
 }
