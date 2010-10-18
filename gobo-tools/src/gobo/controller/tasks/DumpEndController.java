@@ -1,6 +1,6 @@
 package gobo.controller.tasks;
 
-import gobo.ControllerBase;
+import gobo.TaskQueueBase;
 import gobo.model.GbControl;
 import gobo.service.GbMailService;
 
@@ -9,16 +9,13 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 
-public class DumpEndController extends ControllerBase {
+public class DumpEndController extends TaskQueueBase {
 
 	@Override
-	protected String run() throws Exception {
+	protected String runTask() throws Exception {
 
 		final Key controlKey = asKey("controlKey");
 		Entity gbControl = datastore.get(controlKey);
-
-		// Delete control row.
-		datastore.delete(controlKey);
 
 		final Key parentKey = controlKey.getParent();
 		int count =
@@ -33,6 +30,8 @@ public class DumpEndController extends ControllerBase {
 			System.out.println("Finished");
 		}
 
+		// Delete control row.
+		datastore.delete(controlKey);
 		return null;
 	}
 

@@ -1,6 +1,6 @@
 package gobo.controller.tasks;
 
-import gobo.ControllerBase;
+import gobo.TaskQueueBase;
 import gobo.dto.GbEntity;
 import gobo.dto.GbProperty;
 import gobo.model.GbControl;
@@ -25,12 +25,12 @@ import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
-public class DumpController extends ControllerBase {
+public class DumpController extends TaskQueueBase {
 
 	final Integer RANGE = 25;
 
 	@Override
-	protected String run() throws Exception {
+	protected String runTask() throws Exception {
 
 		final Key controlKey = asKey("controlKey");
 		Entity control = datastore.get(controlKey);
@@ -42,8 +42,6 @@ public class DumpController extends ControllerBase {
 		final String token = (String) control.getProperty(GbControl.AUTH_SUB_TOKEN);
 		System.out.println("dump kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
-		// final String retryCount =
-		// request.getHeader("X-AppEngine-TaskRetryCount");
 
 		// Prepare table only at first chain.
 		GbSpreadsheetService spreadsheetService = new GbSpreadsheetService(token);

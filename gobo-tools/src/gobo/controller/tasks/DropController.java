@@ -1,6 +1,6 @@
 package gobo.controller.tasks;
 
-import gobo.ControllerBase;
+import gobo.TaskQueueBase;
 import gobo.model.GbControl;
 
 import java.util.ArrayList;
@@ -17,12 +17,12 @@ import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
-public class DropController extends ControllerBase {
+public class DropController extends TaskQueueBase {
 
 	final Integer RANGE = 100;
 
 	@Override
-	protected String run() throws Exception {
+	protected String runTask() throws Exception {
 
 		final Key controlKey = asKey("controlKey");
 		Entity control = datastore.get(controlKey);
