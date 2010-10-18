@@ -8,6 +8,7 @@ import gobo.service.GbMailService;
 
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 
@@ -23,7 +24,8 @@ public class DropEndController extends TaskQueueBase {
 
 		final Key parentKey = controlKey.getParent();
 		int count =
-			datastore.prepare(new Query(GbControl.NAME).setAncestor(parentKey)).countEntities();
+			datastore.prepare(new Query(GbControl.NAME).setAncestor(parentKey)).countEntities(
+				FetchOptions.Builder.withDefaults());
 		if (count == 0) {
 			// Mail
 			final long controlId = parentKey.getId();
