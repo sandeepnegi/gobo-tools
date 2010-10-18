@@ -1,9 +1,12 @@
 package gobo.util;
 
+import gobo.dto.GbEntity;
+import gobo.dto.GbProperty;
 import gobo.service.GbSpreadsheetService;
 
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.data.docs.DocumentListEntry;
@@ -15,7 +18,46 @@ public class SpreadsheetUtil {
 	public static SpreadsheetEntry createSpreadsheet(String authSubToken, String[] kinds) {
 		GbSpreadsheetService goboService = new GbSpreadsheetService(authSubToken);
 		try {
-			return goboService.createSpreadsheet(Arrays.asList(kinds));
+			SpreadsheetEntry createSpreadsheet =
+				goboService.createSpreadsheet(Arrays.asList(kinds));
+			for (String kind : kinds) {
+				List<GbProperty> testPropList1 = TestDataUtil.testPropList1();
+				goboService.updateWorksheetSize(createSpreadsheet.getKey(), kind, testPropList1.size());
+				goboService.createTableInWorksheet(createSpreadsheet.getKey(), kind, testPropList1);
+			}
+			return createSpreadsheet;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static SpreadsheetEntry createAndDumpSpreadsheet(String authSubToken, String[] kinds) {
+		GbSpreadsheetService goboService = new GbSpreadsheetService(authSubToken);
+		try {
+			SpreadsheetEntry createSpreadsheet =
+				goboService.createSpreadsheet(Arrays.asList(kinds));
+			int i = 0;
+			for (String kind : kinds) {
+				List<GbProperty> testPropList1 = TestDataUtil.testPropList1();
+				goboService.updateWorksheetSize(createSpreadsheet.getKey(), kind, testPropList1.size());
+				goboService.createTableInWorksheet(createSpreadsheet.getKey(), kind, testPropList1);
+				List<GbEntity> list = TestDataUtil.testEntity5(kind);
+				goboService.dumpData(createSpreadsheet.getKey(), kind, String.valueOf(i++), list);
+			}
+			return createSpreadsheet;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static SpreadsheetEntry createBlunkSpreadsheet(String authSubToken, String[] kinds) {
+		GbSpreadsheetService goboService = new GbSpreadsheetService(authSubToken);
+		try {
+			SpreadsheetEntry createSpreadsheet =
+				goboService.createSpreadsheet(Arrays.asList(kinds));
+			return createSpreadsheet;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
