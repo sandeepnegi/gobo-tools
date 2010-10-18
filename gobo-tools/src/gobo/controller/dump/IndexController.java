@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Query;
 
 public class IndexController extends AuthSubBase {
@@ -19,7 +20,9 @@ public class IndexController extends AuthSubBase {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		for (String kind : kinds) {
 			Map<String, Object> row = new HashMap<String, Object>();
-			int count = datastore.prepare(new Query(kind)).countEntities();
+			int count =
+				datastore.prepare(new Query(kind)).countEntities(
+					FetchOptions.Builder.withDefaults());
 			if (count == 0) {
 				continue;
 			}
@@ -28,7 +31,7 @@ public class IndexController extends AuthSubBase {
 			list.add(row);
 		}
 		requestScope("list", list);
-		
+
 		return forward("/gobo/dump/index.jsp");
 	}
 }
