@@ -90,12 +90,16 @@ public class GbDatastoreService {
 					break;
 				}
 			}
+			if (targetEntity == null) {
+				throw new RuntimeException("The specified kind has no property");
+			}
 			List<Property> propertys = targetEntity.propertys();
 			for (Property property : propertys) {
 				GbProperty gbProperty = new GbProperty();
 				gbProperty.setName(property.getName());
 				list.add(gbProperty);
 			}
+
 		}
 		System.out.println(list);
 		return list;
