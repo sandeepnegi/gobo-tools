@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -36,6 +37,7 @@ public class TaskQueueUtil {
 		Key childKey = KeyFactory.createKey(controlId, GbControl.NAME, kindName);
 		Entity control = new Entity(childKey);
 		control.setProperty(GbControl.KIND_NAME, kindName);
+		control.setProperty(GbControl.REPORT_TO, new Email("test@example.com"));
 		control.setProperty(GbControl.COUNT, 0);
 		control.setProperty(GbControl.UPDATE_DATE, new Date());
 		datastore.put(control);

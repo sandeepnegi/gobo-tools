@@ -1,5 +1,7 @@
 package gobo;
 
+import java.util.logging.Logger;
+
 import gobo.model.GbControl;
 import gobo.service.GbMailService;
 
@@ -11,6 +13,8 @@ public abstract class TaskQueueBase extends ControllerBase {
 
 	static final int RETRY_MAX = 5;
 
+	private static final Logger logger = Logger.getLogger(TaskQueueBase.class.getName());
+
 	@Override
 	protected String run() throws Exception {
 
@@ -18,8 +22,8 @@ public abstract class TaskQueueBase extends ControllerBase {
 		final Integer retryCount = (_retryCount == null) ? 0 : new Integer(_retryCount);
 		if (retryCount > RETRY_MAX) {
 			try {
-				System.out.println("Over retry count.");
-				
+				logger.severe("Over retry count.");
+
 				// Error Mail
 				final Key controlKey = asKey("controlKey");
 				final Entity gbControl = datastore.get(controlKey);
@@ -27,12 +31,14 @@ public abstract class TaskQueueBase extends ControllerBase {
 				final long controlId = parentKey.getId();
 				final Object reportTo = gbControl.getProperty(GbControl.REPORT_TO);
 				if (reportTo != null) {
-					GbMailService.sendMail((Email) reportTo, controlId, "Error occured in "
-						+ parentKey.getName());
+					GbMailService.sendMail(
+						(Email) reportTo,
+						controlId,
+						"Abort. Prease check the log.");
 				}
 				// Delete control row.
 				datastore.delete(controlKey);
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

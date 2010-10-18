@@ -9,6 +9,7 @@ import gobo.service.GbSpreadsheetService;
 
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -23,6 +24,8 @@ public class RestoreController extends TaskQueueBase {
 
 	final Integer RANGE = 50;
 
+	private static final Logger logger = Logger.getLogger(RestoreController.class.getName());
+
 	@Override
 	protected String runTask() throws Exception {
 
@@ -32,7 +35,7 @@ public class RestoreController extends TaskQueueBase {
 		final String kind = (String) control.getProperty(GbControl.KIND_NAME);
 		final Integer rowNum = ((Long) control.getProperty(GbControl.COUNT)).intValue();
 		final String token = (String) control.getProperty(GbControl.AUTH_SUB_TOKEN);
-		System.out.println("Restoring kind=" + kind + ":rowNum=" + rowNum);
+		logger.info("Restore:kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
 		// Spreadsheetからデータを取得

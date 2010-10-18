@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.apphosting.api.ApiProxy;
@@ -48,6 +49,8 @@ public class GbSpreadsheetService {
 	private String authSubToken;
 	private SpreadsheetService ss;
 	private DocsService cs;
+
+	private static final Logger logger = Logger.getLogger(GbSpreadsheetService.class.getName());
 
 	public GbSpreadsheetService(String authSubToken) {
 		this.authSubToken = authSubToken;
@@ -137,7 +140,7 @@ public class GbSpreadsheetService {
 		CellFeed feed = ss.query(query, CellFeed.class);
 		for (CellEntry cell : feed.getEntries()) {
 			final String shortId = cell.getId().substring(cell.getId().lastIndexOf('/') + 1);
-			// System.out.println(shortId + ":" + cell.getCell().getValue());
+			logger.fine(shortId + ":" + cell.getCell().getValue());
 			int row = Integer.parseInt(shortId.substring(1, shortId.lastIndexOf('C')));
 			int col = Integer.parseInt(shortId.substring(shortId.lastIndexOf('C') + 1));
 			if (row == 1) {
@@ -152,7 +155,7 @@ public class GbSpreadsheetService {
 		final int nextMax = startIndex + maxRows - 1;
 		final int maxRowCount = workSheet.getRowCount();
 		final int maxRow = (nextMax > maxRowCount) ? maxRowCount : nextMax;
-		System.out.println(startIndex + "〜" + maxRow);
+		logger.fine(startIndex + "〜" + maxRow);
 		if (startIndex >= maxRow) {
 			return null;
 		}
@@ -192,7 +195,7 @@ public class GbSpreadsheetService {
 		final String appId = ApiProxy.getCurrentEnvironment().getAppId();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		final String fileName = appId + "_" + sdf.format(new Date());
-		System.out.println("created new file:" + fileName);
+		logger.info("Created new file:" + fileName);
 		DocumentListEntry entry = new com.google.gdata.data.docs.SpreadsheetEntry();
 		entry.setTitle(new PlainTextConstruct(fileName));
 		DocumentListEntry newSpreadSheet =
@@ -215,6 +218,7 @@ public class GbSpreadsheetService {
 			defaultWorksheet.setRowCount(2);
 			defaultWorksheet.setColCount(1);
 			defaultWorksheet.update();
+			logger.info("Worksheet:" + targetKinds.get(0) + "is created.");
 
 			// Add other Worksheets
 			for (int i = 1; i < targetKinds.size(); i++) {
@@ -223,6 +227,7 @@ public class GbSpreadsheetService {
 				newWorksheet.setRowCount(2);
 				newWorksheet.setColCount(1);
 				ss.insert(worksheetFeedUrl, newWorksheet);
+				logger.info("Worksheet:" + targetKinds.get(i) + "is created.");
 			}
 
 			return spreadsheetEntry;
@@ -232,7 +237,7 @@ public class GbSpreadsheetService {
 				try {
 					newSpreadSheet.delete();
 				} catch (Exception e2) {
-					System.err.println(e2);
+					logger.warning(e2.getMessage());
 				}
 			}
 			throw e;
@@ -260,8 +265,12 @@ public class GbSpreadsheetService {
 		for (SpreadsheetEntry entry : spreadsheetFeed.getEntries()) {
 			if (ssKey.equals(entry.getKey())) {
 				spreadsheetEntry = entry;
+				logger.info("Spreadsheet:" + ssKey + " is found.");
 				break;
 			}
+		}
+		if (spreadsheetEntry == null) {
+			throw new RuntimeException("Cannot find spreadsheet:" + ssKey);
 		}
 
 		// Modify a worksheet's column size
@@ -274,10 +283,12 @@ public class GbSpreadsheetService {
 				break;
 			}
 		}
+		if (worksheetEntry == null) {
+			throw new RuntimeException("Cannot find worksheet:" + kind);
+		}
 		worksheetEntry.setColCount(columnSize + 1);
 		worksheetEntry.update();
-
-		System.out.println("Updated worksheet:" + kind);
+		logger.info("Worksheet:" + kind + "'s column-size is set to " + (columnSize + 1));
 	}
 
 	/**
@@ -300,6 +311,7 @@ public class GbSpreadsheetService {
 		for (TableEntry entry : feed.getEntries()) {
 			if (entry.getTitle().getPlainText().equals(kind)) {
 				tableEntry = entry;
+				logger.info("TableFeed:" + kind + " already exists.");
 				break;
 			}
 		}
@@ -325,7 +337,7 @@ public class GbSpreadsheetService {
 			}
 			tableEntry.setData(tableData);
 			tableEntry = ss.insert(tableFeedUrl, tableEntry);
-			System.out.println("Inserted table:" + kind);
+			logger.info("Craeted tableFeed:" + kind);
 		}
 		String[] split = tableEntry.getId().split("/");
 		final String tableId = split[split.length - 1];
@@ -342,7 +354,7 @@ public class GbSpreadsheetService {
 			}
 			URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
 			ss.insert(recordFeedUrl, newEntry);
-			System.out.println("Inserted typeValue row:" + kind);
+			logger.info("Inserted TypeValue row in :" + kind);
 		}
 		return tableId;
 	}
@@ -371,6 +383,7 @@ public class GbSpreadsheetService {
 			valueTypeRowMap.put(field.getName(), field);
 			if (field.getValue().equals(VALUE_TYPE_NOT_SET)) {
 				valueTypeNotSet = true;
+				logger.info("TypeValue row in :" + kind + " is not filled in.");
 			}
 		}
 
@@ -378,7 +391,7 @@ public class GbSpreadsheetService {
 		List<RecordEntry> newRecordList = new ArrayList<RecordEntry>();
 		try {
 			for (GbEntity gbEntity : list) {
-				System.out.println(gbEntity);
+				logger.fine(gbEntity.toString());
 				RecordEntry newEntry = new RecordEntry();
 				final String key = gbEntity.getKey().toString();
 				newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, key));
@@ -388,7 +401,7 @@ public class GbSpreadsheetService {
 						continue;
 					}
 					final String columnName = gbProperty.getName();
-					// System.out.println(columnName + ": " + value);
+					logger.fine(columnName + ": " + value);
 					if (valueTypeRowMap.containsKey(columnName) == false) {
 						continue; // when the colum name is undefined.
 					}
@@ -406,12 +419,13 @@ public class GbSpreadsheetService {
 				RecordEntry inserted = ss.insert(recordFeedUrl, newEntry);
 				newRecordList.add(inserted);
 			}
-			
+
 			// Update valueType row.
 			if (valueTypeNotSet) {
 				valueTypeRow.update();
+				logger.info("Updated TypeValue row in :" + kind);
 			}
-			
+
 		} catch (Exception e) {
 			for (RecordEntry inserted : newRecordList) {
 				try {

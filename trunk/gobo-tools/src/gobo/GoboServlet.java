@@ -1,5 +1,7 @@
 package gobo;
 
+import java.util.logging.Logger;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -7,6 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
 public class GoboServlet extends HttpServlet {
+
+	private static final Logger logger = Logger.getLogger(GoboServlet.class.getName());
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) {
 		processReguest(req, resp);
@@ -29,7 +33,7 @@ public class GoboServlet extends HttpServlet {
 			chars[0] = Character.toUpperCase(chars[0]);
 			className = new String(chars);
 			final String fullName = "gobo.controller" + subPackage + className + "Controller";
-			System.out.println(fullName);
+			logger.info(fullName);
 
 			Class clazz = Class.forName(fullName);
 			ControllerBase controller = (ControllerBase) clazz.newInstance();

@@ -1,6 +1,7 @@
 package gobo.service;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.mail.MailService;
@@ -10,19 +11,22 @@ import com.google.apphosting.api.ApiProxy;
 
 public class GbMailService {
 
-	public static void sendMail(Email email, long controlId, String task) {
+	private static final Logger logger = Logger.getLogger(GbMailService.class.getName());
+
+	public static void sendMail(Email email, long controlId, String message) {
 
 		MailService mailService = MailServiceFactory.getMailService();
 		Message message1 = new Message();
 		message1.setTo(email.getEmail());
-		message1.setSubject("[" + controlId + "]" + task + " Ended");
-		message1.setSender("gobo-tools@" + ApiProxy.getCurrentEnvironment().getAppId() + ".appspotmail.com");
-		message1.setTextBody("[" + controlId + "]" + task + " Ended.");
+		message1.setSubject("The task no [" + controlId + "]" + message);
+		message1.setSender("gobo-tools@"
+			+ ApiProxy.getCurrentEnvironment().getAppId()
+			+ ".appspotmail.com");
+		message1.setTextBody("The task no [" + controlId + "]" + message);
 		try {
 			mailService.send(message1);
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
-			;
+			logger.warning(e.getMessage());
 		}
 	}
 }

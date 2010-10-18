@@ -6,6 +6,7 @@ import gobo.model.GbControl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -21,6 +22,8 @@ public class DropController extends TaskQueueBase {
 
 	final Integer RANGE = 100;
 
+	private static final Logger logger = Logger.getLogger(DropController.class.getName());
+
 	@Override
 	protected String runTask() throws Exception {
 
@@ -28,7 +31,7 @@ public class DropController extends TaskQueueBase {
 		Entity control = datastore.get(controlKey);
 		final String kind = (String) control.getProperty(GbControl.KIND_NAME);
 		final Long rowNum = (Long) control.getProperty(GbControl.COUNT);
-		System.out.println("drop kind=" + kind + ":rowNum=" + rowNum);
+		logger.info("Drop:kind=" + kind + ":rowNum=" + rowNum);
 		Queue queue = QueueFactory.getDefaultQueue();
 
 		FetchOptions withLimit = FetchOptions.Builder.withLimit(RANGE);
