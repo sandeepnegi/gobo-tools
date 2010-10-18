@@ -36,20 +36,21 @@ public class SheetControllerTest extends TestBase {
 	@Test
 	public void runAuthWithDataTest() throws Exception {
 
-		ControllerTester tester = new ControllerTester();
-		HttpSession session = tester.request.getSession(true);
-		session.setAttribute("token", authSubToken);
-
 		String[] kinds = new String[] { "TestKind1" };
 		final SpreadsheetEntry spreadsheet = SpreadsheetUtil.createSpreadsheet(authSubToken, kinds);
-		tester.request.setParameter("ssKey", spreadsheet.getKey());
-
-		String run = tester.start("/restore/sheet");
-		assertNotNull(run);
-		List<Map<String, Object>> list = (List) tester.request.getAttribute("list");
-		assertThat(list.size(), not(0));
-
-		SpreadsheetUtil.deleteSpreadsheet(authSubToken, spreadsheet);
+		try {
+			ControllerTester tester = new ControllerTester();
+			HttpSession session = tester.request.getSession(true);
+			session.setAttribute("token", authSubToken);
+			
+			tester.request.setParameter("ssKey", spreadsheet.getKey());
+			String run = tester.start("/restore/sheet");
+			assertNotNull(run);
+			List<Map<String, Object>> list = (List) tester.request.getAttribute("list");
+			assertThat(list.size(), not(0));
+		} finally {
+			SpreadsheetUtil.deleteSpreadsheet(authSubToken, spreadsheet);
+		}
 	}
 
 }

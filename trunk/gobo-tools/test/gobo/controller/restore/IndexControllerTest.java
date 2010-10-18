@@ -42,13 +42,14 @@ public class IndexControllerTest extends TestBase {
 
 		String[] kinds = new String[] { "TestKind1" };
 		final SpreadsheetEntry spreadsheet = SpreadsheetUtil.createSpreadsheet(authSubToken, kinds);
-
-		String run = tester.start("/restore/index");
-		assertNotNull(run);
-		List<Map<String, Object>> list = (List) tester.request.getAttribute("list");
-		assertThat(list.size(), not(0));
-
-		SpreadsheetUtil.deleteSpreadsheet(authSubToken, spreadsheet);
+		try {
+			String run = tester.start("/restore/index");
+			assertNotNull(run);
+			List<Map<String, Object>> list = (List) tester.request.getAttribute("list");
+			assertThat(list.size(), not(0));
+		} finally {
+			SpreadsheetUtil.deleteSpreadsheet(authSubToken, spreadsheet);
+		}
 	}
 
 }
