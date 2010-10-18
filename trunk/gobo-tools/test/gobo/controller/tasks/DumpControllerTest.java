@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
@@ -107,4 +108,18 @@ public class DumpControllerTest extends TestBase {
 		}
 	}
 
+	@Test(expected = EntityNotFoundException.class)
+	public void runOverRetryCountTest() throws Exception {
+
+		Key controlKey = TaskQueueUtil.prepareDropControlKey("TestKind1");
+
+		ControllerTester tester = new ControllerTester();
+		tester.request.setHeader("X-AppEngine-TaskRetryCount", "6");
+		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
+		String run = tester.start("/tasks/dump");
+		assertNull(run);
+
+		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+		ds.get(controlKey);
+	}	
 }

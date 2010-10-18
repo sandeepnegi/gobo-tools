@@ -14,6 +14,7 @@ import org.junit.Test;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
@@ -39,11 +40,11 @@ public class DropControllerTest extends TestBase {
 		String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
 		QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
 		List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
-		
+
 		// finish task chain
 		assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/dropEnd.gobo?controlKey="
 			+ KeyFactory.keyToString(controlKey)));
-		
+
 		TaskQueueUtil.removeTasks();
 	}
 
@@ -66,12 +67,26 @@ public class DropControllerTest extends TestBase {
 		String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
 		QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
 		List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
-		
+
 		// continue task chain
 		assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/drop.gobo?controlKey="
 			+ KeyFactory.keyToString(controlKey)));
 		TaskQueueUtil.removeTasks();
-		
+
 	}
 
+	@Test(expected = EntityNotFoundException.class)
+	public void runOverRetryCountTest() throws Exception {
+
+		Key controlKey = TaskQueueUtil.prepareDropControlKey("TestKind1");
+
+		ControllerTester tester = new ControllerTester();
+		tester.request.setHeader("X-AppEngine-TaskRetryCount", "6");
+		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
+		String run = tester.start("/tasks/drop");
+		assertNull(run);
+
+		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+		ds.get(controlKey);
+	}
 }

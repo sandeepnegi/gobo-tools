@@ -1,6 +1,7 @@
 package gobo.controller.tasks;
 
 import gobo.ControllerBase;
+import gobo.TaskQueueBase;
 import gobo.dto.GbEntity;
 import gobo.model.GbControl;
 import gobo.service.GbDatastoreService;
@@ -17,12 +18,13 @@ import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
-public class RestoreController extends ControllerBase {
+@SuppressWarnings("unused")
+public class RestoreController extends TaskQueueBase {
 
 	final Integer RANGE = 50;
 
 	@Override
-	protected String run() throws Exception {
+	protected String runTask() throws Exception {
 
 		final Key controlKey = asKey("controlKey");
 		Entity control = datastore.get(controlKey);
