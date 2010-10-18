@@ -31,25 +31,27 @@ public class RestoreEndControllerTest extends TestBase {
 
 		String[] kinds = { "TestKind1" };
 		SpreadsheetEntry ssEntry = SpreadsheetUtil.createSpreadsheet(authSubToken, kinds);
+		try {
+			Key controlKey =
+				TaskQueueUtil.prepareRestoreControlKey("TestKind1", ssEntry.getKey(), authSubToken);
 
-		Key controlKey =
-			TaskQueueUtil.prepareRestoreControlKey("TestKind1", ssEntry.getKey(), authSubToken);
+			ControllerTester tester = new ControllerTester();
+			tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
 
-		ControllerTester tester = new ControllerTester();
-		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
+			String run = tester.start("/tasks/restoreEnd");
+			assertNull(run);
 
-		String run = tester.start("/tasks/restoreEnd");
-		assertNull(run);
+			LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
+			String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
+			QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
+			List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
 
-		LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
-		String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
-		QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
-		List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
+			// finish task chain
+			assertThat(taskInfo.size(), is(0));
 
-		// finish task chain
-		assertThat(taskInfo.size(), is(0));
-		
-		SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
+		} finally {
+			SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
+		}
 
 	}
 }

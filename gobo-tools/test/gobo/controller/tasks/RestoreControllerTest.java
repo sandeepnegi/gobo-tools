@@ -31,27 +31,28 @@ public class RestoreControllerTest extends TestBase {
 
 		String[] kinds = { "TestKind1" };
 		SpreadsheetEntry ssEntry = SpreadsheetUtil.createSpreadsheet(authSubToken, kinds);
+		try {
+			Key controlKey =
+				TaskQueueUtil.prepareRestoreControlKey("TestKind1", ssEntry.getKey(), authSubToken);
 
-		Key controlKey =
-			TaskQueueUtil.prepareRestoreControlKey("TestKind1", ssEntry.getKey(), authSubToken);
+			ControllerTester tester = new ControllerTester();
+			tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
+			String run = tester.start("/tasks/restore");
+			assertNull(run);
 
-		ControllerTester tester = new ControllerTester();
-		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
-		String run = tester.start("/tasks/restore");
-		assertNull(run);
+			LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
+			String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
+			QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
+			List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
 
-		LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
-		String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
-		QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
-		List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
+			// finish task chain
+			assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/restoreEnd.gobo?controlKey="
+				+ KeyFactory.keyToString(controlKey)));
 
-		// finish task chain
-		assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/restoreEnd.gobo?controlKey="
-			+ KeyFactory.keyToString(controlKey)));
-
-		SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
-		
-		TaskQueueUtil.removeTasks();
+		} finally {
+			TaskQueueUtil.removeTasks();
+			SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
+		}
 
 	}
 
@@ -60,26 +61,27 @@ public class RestoreControllerTest extends TestBase {
 
 		String[] kinds = { "TestKind1" };
 		SpreadsheetEntry ssEntry = SpreadsheetUtil.createAndDumpSpreadsheet(authSubToken, kinds);
+		try {
+			Key controlKey =
+				TaskQueueUtil.prepareRestoreControlKey("TestKind1", ssEntry.getKey(), authSubToken);
 
-		Key controlKey =
-			TaskQueueUtil.prepareRestoreControlKey("TestKind1", ssEntry.getKey(), authSubToken);
+			ControllerTester tester = new ControllerTester();
+			tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
+			String run = tester.start("/tasks/restore");
+			assertNull(run);
 
-		ControllerTester tester = new ControllerTester();
-		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
-		String run = tester.start("/tasks/restore");
-		assertNull(run);
+			LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
+			String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
+			QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
+			List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
 
-		LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
-		String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
-		QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
-		List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
+			// finish task chain
+			assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/restore.gobo?controlKey="
+				+ KeyFactory.keyToString(controlKey)));
 
-		// finish task chain
-		assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/restore.gobo?controlKey="
-			+ KeyFactory.keyToString(controlKey)));
-
-		SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
-		
-		TaskQueueUtil.removeTasks();
+		} finally {
+			TaskQueueUtil.removeTasks();
+			SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
+		}
 	}
 }

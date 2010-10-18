@@ -39,37 +39,39 @@ public class DumpControllerTest extends TestBase {
 
 		String[] kinds = { "TestKind1" };
 		SpreadsheetEntry ssEntry = SpreadsheetUtil.createBlunkSpreadsheet(authSubToken, kinds);
+		try {
+			ControllerTester tester = new ControllerTester();
+			Key controlKey =
+				TaskQueueUtil.prepareDumpControlKey("TestKind1", ssEntry.getKey(), authSubToken);
+			tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
+			String run = tester.start("/tasks/dump");
+			assertNull(run);
 
-		ControllerTester tester = new ControllerTester();
-		Key controlKey =
-			TaskQueueUtil.prepareDumpControlKey("TestKind1", ssEntry.getKey(), authSubToken);
-		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
-		String run = tester.start("/tasks/dump");
-		assertNull(run);
+			LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
+			String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
+			QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
+			List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
+			assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/dump.gobo?controlKey="
+				+ KeyFactory.keyToString(controlKey)));
 
-		LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
-		String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
-		QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
-		List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
-		assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/dump.gobo?controlKey="
-			+ KeyFactory.keyToString(controlKey)));
+			TaskQueueUtil.removeTasks();
 
-		TaskQueueUtil.removeTasks();
+			// 2nd time.
+			run = tester.start("/tasks/dump");
+			assertNull(run);
 
-		// 2nd time.
-		run = tester.start("/tasks/dump");
-		assertNull(run);
+			ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
+			defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
+			qsi = ltq.getQueueStateInfo().get(defaultQueueName);
+			taskInfo = qsi.getTaskInfo();
+			assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/dumpEnd.gobo?controlKey="
+				+ KeyFactory.keyToString(controlKey)));
 
-		ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
-		defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
-		qsi = ltq.getQueueStateInfo().get(defaultQueueName);
-		taskInfo = qsi.getTaskInfo();
-		assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/dumpEnd.gobo?controlKey="
-			+ KeyFactory.keyToString(controlKey)));
+			TaskQueueUtil.removeTasks();
 
-		TaskQueueUtil.removeTasks();
-		
-		SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
+		} finally {
+			SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
+		}
 	}
 
 	@Test
@@ -82,25 +84,27 @@ public class DumpControllerTest extends TestBase {
 		String[] kinds = { "TestKind1" };
 		SpreadsheetEntry ssEntry = SpreadsheetUtil.createSpreadsheet(authSubToken, kinds);
 
-		ControllerTester tester = new ControllerTester();
-		Key controlKey =
-			TaskQueueUtil.prepareDumpControlKey("TestKind1", ssEntry.getKey(), authSubToken);
-		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
-		String run = tester.start("/tasks/dump");
-		assertNull(run);
+		try {
+			ControllerTester tester = new ControllerTester();
+			Key controlKey =
+				TaskQueueUtil.prepareDumpControlKey("TestKind1", ssEntry.getKey(), authSubToken);
+			tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
+			String run = tester.start("/tasks/dump");
+			assertNull(run);
 
-		LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
-		String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
-		QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
-		List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
+			LocalTaskQueue ltq = LocalTaskQueueTestConfig.getLocalTaskQueue();
+			String defaultQueueName = QueueFactory.getDefaultQueue().getQueueName();
+			QueueStateInfo qsi = ltq.getQueueStateInfo().get(defaultQueueName);
+			List<TaskStateInfo> taskInfo = qsi.getTaskInfo();
 
-		// continue task chain
-		assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/dump.gobo?controlKey="
-			+ KeyFactory.keyToString(controlKey)));
-		
-		TaskQueueUtil.removeTasks();
+			// continue task chain
+			assertThat(taskInfo.get(0).getUrl(), equalTo("/tasks/dump.gobo?controlKey="
+				+ KeyFactory.keyToString(controlKey)));
 
-		SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
+			TaskQueueUtil.removeTasks();
+		} finally {
+			SpreadsheetUtil.deleteSpreadsheet(authSubToken, ssEntry);
+		}
 	}
 
 }
