@@ -1,6 +1,7 @@
 package gobo.service;
 
 import gobo.dto.GbEntity;
+import gobo.dto.GbEntityList;
 import gobo.dto.GbProperty;
 import gobo.model.GbControl;
 import gobo.slim3.AppEngineUtil;
@@ -10,15 +11,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
+
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.QueryResultList;
 import com.google.appengine.repackaged.com.google.common.collect.Lists;
 import com.google.apphosting.api.DatastorePb.Schema;
 import com.google.storage.onestore.v3.OnestoreEntity.EntityProto;
@@ -108,7 +114,41 @@ public class GbDatastoreService {
 		return list;
 	}
 
-	public void restoreData(String wsTitle, List<GbEntity> data) {
+	public static GbEntityList<GbEntity> getData(Cursor cursor, String kind, Integer range) {
+
+		// Get Data
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		PreparedQuery query = datastore.prepare(new Query(kind));
+		FetchOptions fetchOptions = null;
+		if (cursor == null) {
+			fetchOptions = FetchOptions.Builder.withLimit(range);
+		} else {
+			fetchOptions = FetchOptions.Builder.withStartCursor(cursor).limit(range);
+		}
+		QueryResultList<Entity> data = query.asQueryResultList(fetchOptions);
+
+		// Re-package.
+		GbEntityList<GbEntity> list = new GbEntityList<GbEntity>();
+		for (Entity entity : data) {
+			GbEntity gbEntity = new GbEntity();
+			gbEntity.setKey(entity.getKey());
+			Set<String> propNames = entity.getProperties().keySet();
+			for (String propName : propNames) {
+				GbProperty gbProperty = new GbProperty();
+				gbProperty.setName(propName);
+				gbProperty.setValue(entity.getProperty(propName));
+				gbEntity.addProperty(gbProperty);
+			}
+			list.add(gbEntity);
+		}
+
+		// Set cursor
+		list.setCursor(data.getCursor());
+
+		return list;
+	}
+
+	public static void restoreData(String wsTitle, List<GbEntity> data) {
 
 		List<Entity> newList = new ArrayList<Entity>();
 		List<Key> orgKeyList = new ArrayList<Key>();

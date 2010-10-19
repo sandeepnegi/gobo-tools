@@ -21,9 +21,8 @@ public class GbDatastoreServiceTest extends TestBase {
 	@Test
 	public void restoreOnce() {
 
-		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list = TestDataUtil.testEntity1();
-		ds.restoreData(TestDataUtil.TEST_KIND, list);
+		List<GbEntity> list = TestDataUtil.entities();
+		GbDatastoreService.restoreData(TestDataUtil.TEST_KIND, list);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
@@ -56,12 +55,11 @@ public class GbDatastoreServiceTest extends TestBase {
 	@Test
 	public void restoreTwice() {
 
-		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list = TestDataUtil.testEntity1();
-		ds.restoreData(TestDataUtil.TEST_KIND, list);
+		List<GbEntity> list = TestDataUtil.entities();
+		GbDatastoreService.restoreData(TestDataUtil.TEST_KIND, list);
 
-		List<GbEntity> list2 = TestDataUtil.testEntity2();
-		ds.restoreData(TestDataUtil.TEST_KIND, list2);
+		List<GbEntity> list2 = TestDataUtil.entitiesWidhDiffKeys();
+		GbDatastoreService.restoreData(TestDataUtil.TEST_KIND, list2);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
@@ -106,12 +104,11 @@ public class GbDatastoreServiceTest extends TestBase {
 	@Test
 	public void restoreWithDifferentProp() {
 
-		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list1 = TestDataUtil.testEntity1();
-		ds.restoreData(TestDataUtil.TEST_KIND, list1);
+		List<GbEntity> list1 = TestDataUtil.entities();
+		GbDatastoreService.restoreData(TestDataUtil.TEST_KIND, list1);
 
-		List<GbEntity> list3 = TestDataUtil.testEntity3();
-		ds.restoreData(TestDataUtil.TEST_KIND, list3);
+		List<GbEntity> list3 = TestDataUtil.entitiesWithDiffProp();
+		GbDatastoreService.restoreData(TestDataUtil.TEST_KIND, list3);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =
@@ -149,12 +146,11 @@ public class GbDatastoreServiceTest extends TestBase {
 	@Test
 	public void restoreWithNullValue() {
 
-		GbDatastoreService ds = new GbDatastoreService();
-		List<GbEntity> list1 = TestDataUtil.testEntity1();
-		ds.restoreData(TestDataUtil.TEST_KIND, list1);
+		List<GbEntity> list1 = TestDataUtil.entities();
+		GbDatastoreService.restoreData(TestDataUtil.TEST_KIND, list1);
 
-		List<GbEntity> list4 = TestDataUtil.testEntity4();
-		ds.restoreData(TestDataUtil.TEST_KIND, list4);
+		List<GbEntity> list4 = TestDataUtil.entitiesWithNull();
+		GbDatastoreService.restoreData(TestDataUtil.TEST_KIND, list4);
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		List<Entity> asList =

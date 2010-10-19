@@ -191,11 +191,11 @@ public class GbSpreadsheetService {
 	 */
 	public SpreadsheetEntry createSpreadsheet(List<String> targetKinds) throws Exception {
 
+		logger.info("Creating new file.");
 		// Create "docs".SpreadsheetEntry
 		final String appId = ApiProxy.getCurrentEnvironment().getAppId();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		final String fileName = appId + "_" + sdf.format(new Date());
-		logger.info("Created new file:" + fileName);
 		DocumentListEntry entry = new com.google.gdata.data.docs.SpreadsheetEntry();
 		entry.setTitle(new PlainTextConstruct(fileName));
 		DocumentListEntry newSpreadSheet =
@@ -229,7 +229,7 @@ public class GbSpreadsheetService {
 				ss.insert(worksheetFeedUrl, newWorksheet);
 				logger.info("Worksheet:" + targetKinds.get(i) + "is created.");
 			}
-
+			logger.info("Created new file:" + fileName);
 			return spreadsheetEntry;
 
 		} catch (Exception e) {
@@ -245,16 +245,17 @@ public class GbSpreadsheetService {
 	}
 
 	/**
-	 * Update worksheet's column size
+	 * Prepare worksheet before dump
 	 * 
 	 * @param ssKey
 	 * @param kind
-	 * @param columnSize
-	 * @throws IOException
-	 * @throws ServiceException
+	 * @param properties
+	 * @throws Exception
 	 */
-	public void updateWorksheetSize(String ssKey, String kind, Integer columnSize)
-			throws IOException, ServiceException {
+	public String prepareWorksheet(String ssKey, String kind, List<GbProperty> properties)
+			throws Exception {
+
+		logger.info("Preparing worksheet :" + kind);
 
 		// Search Spreadsheet
 		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
@@ -286,21 +287,9 @@ public class GbSpreadsheetService {
 		if (worksheetEntry == null) {
 			throw new RuntimeException("Cannot find worksheet:" + kind);
 		}
-		worksheetEntry.setColCount(columnSize + 1);
+		worksheetEntry.setColCount(properties.size() + 1);
 		worksheetEntry.update();
-		logger.info("Worksheet:" + kind + "'s column-size is set to " + (columnSize + 1));
-	}
-
-	/**
-	 * Create table(table-based feed)
-	 * 
-	 * @param ssKey
-	 * @param kind
-	 * @param properties
-	 * @throws Exception
-	 */
-	public String createTableInWorksheet(String ssKey, String kind, List<GbProperty> properties)
-			throws Exception {
+		logger.info("Worksheet:" + kind + "'s column-size is set to " + (properties.size() + 1));
 
 		FeedURLFactory factory = FeedURLFactory.getDefault();
 		URL tableFeedUrl = factory.getTableFeedUrl(ssKey);
@@ -316,7 +305,7 @@ public class GbSpreadsheetService {
 			}
 		}
 
-		// Add Table
+		// Add TableFeed
 		if (tableEntry == null) {
 			tableEntry = new TableEntry();
 			tableEntry.setTitle(new PlainTextConstruct(kind));
@@ -374,6 +363,7 @@ public class GbSpreadsheetService {
 		URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
 
 		// Get "valueType" row for update.
+		logger.info("Checking valueType row in :" + kind);
 		RecordQuery query = new RecordQuery(recordFeedUrl);
 		query.setSpreadsheetQuery(Entity.KEY_RESERVED_PROPERTY + "=" + VALUE_TYPE);
 		RecordEntry valueTypeRow = ss.query(query, RecordFeed.class).getEntries().get(0);
@@ -387,10 +377,11 @@ public class GbSpreadsheetService {
 		}
 
 		// Add new rows to table
+		logger.info("Start writing dump data to :" + kind);
 		List<RecordEntry> newRecordList = new ArrayList<RecordEntry>();
 		try {
 			for (GbEntity gbEntity : list) {
-				logger.fine(gbEntity.toString());
+				logger.info(gbEntity.toString());
 				RecordEntry newEntry = new RecordEntry();
 				final String key = gbEntity.getKey().toString();
 				newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, key));
@@ -400,7 +391,6 @@ public class GbSpreadsheetService {
 						continue;
 					}
 					final String columnName = gbProperty.getName();
-					logger.fine(columnName + ": " + value);
 					if (valueTypeRowMap.containsKey(columnName) == false) {
 						continue; // when the colum name is undefined.
 					}
@@ -418,6 +408,7 @@ public class GbSpreadsheetService {
 				RecordEntry inserted = ss.insert(recordFeedUrl, newEntry);
 				newRecordList.add(inserted);
 			}
+			logger.info("Finish writing dump data to :" + kind);
 
 			// Update valueType row.
 			if (valueTypeNotSet) {

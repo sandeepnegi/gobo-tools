@@ -95,13 +95,12 @@ public class GbSpreadsheetServiceTest extends TestBase {
 			kindList.add("TestKind" + i);
 		}
 		String[] kinds = kindList.toArray(new String[0]);
-		List<GbProperty> propList = TestDataUtil.testPropList1();
+		List<GbProperty> propList = TestDataUtil.entities2();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		try {
 			for (int i = 0; i < kinds.length; i++) {
-				goboService.updateWorksheetSize(spreadsheet.getKey(), kinds[i], propList.size());
 				String tableId =
-					goboService.createTableInWorksheet(spreadsheet.getKey(), kinds[i], propList);
+					goboService.prepareWorksheet(spreadsheet.getKey(), kinds[i], propList);
 				assertThat(tableId, is(String.valueOf(i)));
 			}
 		} finally {
@@ -113,14 +112,12 @@ public class GbSpreadsheetServiceTest extends TestBase {
 	public void updateWorksheetTwiceForRetryTest() throws Exception {
 
 		String[] kinds = new String[] { "TestKind1" };
-		List<GbProperty> propList = TestDataUtil.testPropList1();
+		List<GbProperty> propList = TestDataUtil.entities2();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		try {
 
-			goboService.updateWorksheetSize(spreadsheet.getKey(), kinds[0], propList.size());
-			goboService.createTableInWorksheet(spreadsheet.getKey(), kinds[0], propList);
-			goboService.updateWorksheetSize(spreadsheet.getKey(), kinds[0], propList.size());
-			goboService.createTableInWorksheet(spreadsheet.getKey(), kinds[0], propList);
+			goboService.prepareWorksheet(spreadsheet.getKey(), kinds[0], propList);
+			goboService.prepareWorksheet(spreadsheet.getKey(), kinds[0], propList);
 
 		} finally {
 			deleteSpreadsheet(spreadsheet);
@@ -136,18 +133,17 @@ public class GbSpreadsheetServiceTest extends TestBase {
 		}
 		String[] kinds = kindList.toArray(new String[0]);
 
-		List<GbProperty> propList = TestDataUtil.testPropList1();
+		List<GbProperty> propList = TestDataUtil.entities2();
 		final SpreadsheetEntry spreadsheet = createSpreadsheet(kinds);
 		String ssKey = spreadsheet.getKey();
 		try {
 			for (int i = 0; i < kinds.length; i++) {
-				goboService.updateWorksheetSize(ssKey, kinds[i], propList.size());
-				String tableId = goboService.createTableInWorksheet(ssKey, kinds[i], propList);
+				String tableId = goboService.prepareWorksheet(ssKey, kinds[i], propList);
 				assertThat(tableId, is(String.valueOf(i)));
 			}
 
 			for (int i = 0; i < kinds.length; i++) {
-				List<GbEntity> entityList = TestDataUtil.testEntity5(kinds[i]);
+				List<GbEntity> entityList = TestDataUtil.entities(kinds[i]);
 				goboService.dumpData(ssKey, kinds[i], String.valueOf(i), entityList);
 			}
 			for (int i = 0; i < kinds.length; i++) {

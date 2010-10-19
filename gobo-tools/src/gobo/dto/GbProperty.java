@@ -127,9 +127,24 @@ public class GbProperty {
 		if (value == null) {
 			return null;
 		}
-
 		String val = null;
-		if (value instanceof User) {
+
+		if (value instanceof Collection<?>) {
+			Iterator<?> it = ((Collection<?>) value).iterator();
+			GbProperty inner = new GbProperty();
+			StringBuilder sb = new StringBuilder();
+			while (it.hasNext()) {
+				Object next = it.next();
+				inner.setValue(next);
+				final String innerValue = inner.asSpreadsheetValue();
+				sb.append(innerValue + ",");
+			}
+			return sb.toString().substring(0, sb.length() - 1);
+		}
+
+		if (value instanceof String) {
+			val = value.toString();
+		} else if (value instanceof User) {
 			User user = (User) value;
 			val =
 				user.getEmail()
@@ -139,19 +154,21 @@ public class GbProperty {
 					+ user.getUserId()
 					+ VALUE_SEPARATER
 					+ user.getFederatedIdentity();
+		} else if (value instanceof Double) {
+			val = value.toString();
 		} else if (value instanceof Blob) {
 			// Blob column is NOT contained in GbDatastoreService#getProperties.
 			// return null;
-			val = NOT_SUPPORTED;
+			return NOT_SUPPORTED;
 		} else if (value instanceof Text) {
 			// val = ((Text) value).getValue();
-			val = NOT_SUPPORTED;
+			return NOT_SUPPORTED;
 		} else if (value instanceof Date) {
 			val = String.valueOf(((Date) value).getTime());
 		} else if (value instanceof Link) {
 			val = ((Link) value).toString();
 		} else if (value instanceof ShortBlob) {
-			val = NOT_SUPPORTED;
+			return NOT_SUPPORTED;
 		} else if (value instanceof Category) {
 			val = ((Category) value).getCategory();
 		} else if (value instanceof GeoPt) {
@@ -172,21 +189,10 @@ public class GbProperty {
 			val = ((IMHandle) value).toString();
 		} else if (value instanceof BlobKey) {
 			val = ((BlobKey) value).getKeyString();
-		} else if (value instanceof Collection<?>) {
-			Iterator<?> it = ((Collection<?>) value).iterator();
-			GbProperty inner = new GbProperty();
-			StringBuilder sb = new StringBuilder();
-			while (it.hasNext()) {
-				Object next = it.next();
-				inner.setValue(next);
-				final String innerValue = inner.asSpreadsheetValue();
-				sb.append(innerValue + ",");
-			}
-			val = sb.toString().substring(0, sb.length() - 1);
 		} else {
 			val = value.toString();
 		}
-		return val;
+		return "\"" + val + "\"";
 	}
 
 	/**
@@ -200,12 +206,30 @@ public class GbProperty {
 		}
 
 		Object val = null;
+		if (valueType.startsWith(LIST + "<")) {
+			String innerValueType = valueType.substring(valueType.indexOf('<') + 1);
+			innerValueType = innerValueType.substring(0, innerValueType.indexOf('>'));
+			String[] split = ((String) value).split(",");
+			List<Object> list = new ArrayList<Object>();
+			for (int i = 0; i < split.length; i++) {
+				GbProperty innser = new GbProperty();
+				innser.setValueType(innerValueType);
+				innser.setValue(split[i]);
+				list.add(innser.asDatastoreValue());
+			}
+			return list;
+		}
+
+		final String _tmp = (String) value;
+		if ((_tmp.startsWith("\"")) && (_tmp.endsWith("\""))) {
+			value = _tmp.subSequence(1, _tmp.length() - 1);
+		}
 		if ((valueType == null) || (valueType.length() == 0)) {
 			val = value;
 		} else if (valueType.equals(BOOLEAN)) {
 			val = new Boolean((String) value);
 		} else if (valueType.equals(STRING)) {
-			val = value;
+			val = ((String) value);
 		} else if (valueType.equals(LONG)) {
 			val = new Long((String) value);
 		} else if (valueType.equals(DOUBLE)) {
@@ -244,18 +268,6 @@ public class GbProperty {
 			val = new IMHandle(Scheme.valueOf(split[0]), split[1]);
 		} else if (valueType.equals(BLOB_KEY)) {
 			val = new BlobKey((String) value);
-		} else if (valueType.startsWith(LIST + "<")) {
-			String innerValueType = valueType.substring(valueType.indexOf('<') + 1);
-			innerValueType = innerValueType.substring(0, innerValueType.indexOf('>'));
-			String[] split = ((String) value).split(",");
-			List<Object> list = new ArrayList<Object>();
-			for (int i = 0; i < split.length; i++) {
-				GbProperty innser = new GbProperty();
-				innser.setValueType(innerValueType);
-				innser.setValue(split[i]);
-				list.add(innser.asDatastoreValue());
-			}
-			val = list;
 		} else {
 			val = value;
 		}

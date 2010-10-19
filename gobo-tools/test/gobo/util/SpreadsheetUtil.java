@@ -21,9 +21,8 @@ public class SpreadsheetUtil {
 			SpreadsheetEntry createSpreadsheet =
 				goboService.createSpreadsheet(Arrays.asList(kinds));
 			for (String kind : kinds) {
-				List<GbProperty> testPropList1 = TestDataUtil.testPropList1();
-				goboService.updateWorksheetSize(createSpreadsheet.getKey(), kind, testPropList1.size());
-				goboService.createTableInWorksheet(createSpreadsheet.getKey(), kind, testPropList1);
+				List<GbProperty> testPropList1 = TestDataUtil.entities2();
+				goboService.prepareWorksheet(createSpreadsheet.getKey(), kind, testPropList1);
 			}
 			return createSpreadsheet;
 		} catch (Exception e) {
@@ -39,10 +38,9 @@ public class SpreadsheetUtil {
 				goboService.createSpreadsheet(Arrays.asList(kinds));
 			int i = 0;
 			for (String kind : kinds) {
-				List<GbProperty> testPropList1 = TestDataUtil.testPropList1();
-				goboService.updateWorksheetSize(createSpreadsheet.getKey(), kind, testPropList1.size());
-				goboService.createTableInWorksheet(createSpreadsheet.getKey(), kind, testPropList1);
-				List<GbEntity> list = TestDataUtil.testEntity5(kind);
+				List<GbProperty> testPropList1 = TestDataUtil.entities2();
+				goboService.prepareWorksheet(createSpreadsheet.getKey(), kind, testPropList1);
+				List<GbEntity> list = TestDataUtil.entities(kind);
 				goboService.dumpData(createSpreadsheet.getKey(), kind, String.valueOf(i++), list);
 			}
 			return createSpreadsheet;

@@ -33,7 +33,7 @@ public class TestDataUtil {
 
 	public static final String TEST_KIND = "TestKind";
 
-	public static List<GbEntity> testEntity1() {
+	public static List<GbEntity> entities() {
 
 		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (int i = 1; i <= 5; i++) {
@@ -58,7 +58,7 @@ public class TestDataUtil {
 		return list;
 	}
 
-	public static List<GbEntity> testEntity2() {
+	public static List<GbEntity> entitiesWidhDiffKeys() {
 
 		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (int i = 1; i <= 5; i++) {
@@ -83,7 +83,7 @@ public class TestDataUtil {
 		return list;
 	}
 
-	public static List<GbEntity> testEntity3() {
+	public static List<GbEntity> entitiesWithDiffProp() {
 
 		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (int i = 1; i <= 5; i++) {
@@ -108,7 +108,7 @@ public class TestDataUtil {
 		return list;
 	}
 
-	public static List<GbEntity> testEntity4() {
+	public static List<GbEntity> entitiesWithNull() {
 
 		List<GbEntity> list = new ArrayList<GbEntity>();
 		for (int i = 1; i <= 5; i++) {
@@ -137,19 +137,19 @@ public class TestDataUtil {
 		return list;
 	}
 
-	public static List<GbEntity> testEntity5(String kindName) {
+	public static List<GbEntity> entities(String kindName) {
 
 		List<GbEntity> list = Lists.newArrayList();
 		for (int i = 0; i < 10; i++) {
 			GbEntity entity = new GbEntity();
 			entity.setKey(KeyFactory.createKey(kindName, i + 1));
-			entity.setProperties(testPropList1());
+			entity.setProperties(entities2());
 			list.add(entity);
 		}
 		return list;
 	}
 
-	public static List<GbProperty> testPropList1() {
+	public static List<GbProperty> entities2() {
 
 		List<GbProperty> propList = Lists.newArrayList();
 
@@ -177,42 +177,43 @@ public class TestDataUtil {
 		List keyList = new ArrayList();
 		for (int i = 0; i < count; i++) {
 
-			Entity entity = new Entity(kindName);
-			entity.setProperty("prop01", RandomStringUtils.randomAlphabetic(10));
-			entity.setProperty("prop02", new Integer(RandomUtils.nextInt()));
-			entity.setProperty("prop03", new Short(RandomStringUtils.randomNumeric(1)));
-			entity.setProperty("prop04", new Long(RandomUtils.nextLong()));
-			entity.setProperty("prop05", new Boolean(RandomUtils.nextBoolean()));
-			entity.setProperty("prop06", new Float(RandomUtils.nextFloat()));
-			entity.setProperty("prop07", new Double(RandomUtils.nextDouble()));
-			entity.setProperty("prop08", new Date(RandomUtils.nextLong()));
-			entity.setProperty("prop09", new User("test@example", "google.com"));
-			entity.setProperty("prop10", KeyFactory.createKey("test", RandomStringUtils
+			Entity entity = new Entity(KeyFactory.createKey(kindName, i + 1));
+			entity.setProperty("String", RandomStringUtils.randomAlphabetic(10));
+			entity.setProperty("Integer", new Integer(RandomUtils.nextInt()));
+			entity.setProperty("Short", new Short(RandomStringUtils.randomNumeric(1)));
+			entity.setProperty("Long", new Long(RandomUtils.nextLong()));
+			entity.setProperty("Boolean", new Boolean(RandomUtils.nextBoolean()));
+			entity.setProperty("Float", new Float(RandomUtils.nextFloat()));
+			entity.setProperty("Double", new Double(RandomUtils.nextDouble()));
+			entity.setProperty("Date", new Date(RandomUtils.nextLong()));
+			entity.setProperty("User", new User("test@example", "google.com"));
+			entity.setProperty("Key", KeyFactory.createKey("test", RandomStringUtils
 				.randomAlphabetic(5)));
-			entity.setProperty("prop11", new Category(RandomStringUtils.randomAlphabetic(3)));
-			entity.setProperty("prop12", new Email("test@example"));
-			entity.setProperty("prop13", new GeoPt(new Float(new Integer(RandomStringUtils
+			entity.setProperty("Category", new Category(RandomStringUtils.randomAlphabetic(3)));
+			entity.setProperty("Email", new Email("test@example"));
+			entity.setProperty("GeoPt", new GeoPt(new Float(new Integer(RandomStringUtils
 				.randomNumeric(2)) - 9), new Float(
 				new Integer(RandomStringUtils.randomNumeric(2)) - 9)));
-			entity.setProperty("prop14", new IMHandle(Scheme.valueOf("sip"), RandomStringUtils
+			entity.setProperty("IMHandle", new IMHandle(Scheme.valueOf("sip"), RandomStringUtils
 				.randomAlphabetic(2)));
-			entity.setProperty("prop15", new Link("test"));
-			entity.setProperty("prop16", new PhoneNumber(RandomStringUtils.randomNumeric(11)));
-			entity.setProperty("prop17", new PostalAddress(RandomStringUtils.randomNumeric(7)));
-			entity.setProperty("prop18", new Rating(Integer.parseInt(RandomStringUtils
+			entity.setProperty("Link", new Link("test"));
+			entity.setProperty("PhoneNumber", new PhoneNumber(RandomStringUtils.randomNumeric(11)));
+			entity.setProperty("PostalAddress", new PostalAddress(RandomStringUtils
+				.randomNumeric(7)));
+			entity.setProperty("Rating", new Rating(Integer.parseInt(RandomStringUtils
 				.randomNumeric(2))));
 
 			List<String> coll = new ArrayList<String>();
 			coll.add(RandomStringUtils.randomAlphabetic(3));
 			coll.add(RandomStringUtils.randomAlphabetic(3));
 			coll.add(RandomStringUtils.randomAlphabetic(3));
-			entity.setProperty("prop19", coll);
+			entity.setProperty("List<String>", coll);
 
 			List<Integer> coll2 = new ArrayList<Integer>();
 			coll2.add(new Integer(RandomStringUtils.randomNumeric(5)));
 			coll2.add(new Integer(RandomStringUtils.randomNumeric(5)));
 			coll2.add(new Integer(RandomStringUtils.randomNumeric(5)));
-			entity.setProperty("prop20", coll2);
+			entity.setProperty("List<Integer>", coll2);
 
 			// Byte, Blob, Text, ShortBlob, BlobKey
 			entity.setProperty("Byte", new Byte(

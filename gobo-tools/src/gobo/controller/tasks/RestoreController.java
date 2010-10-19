@@ -51,8 +51,7 @@ public class RestoreController extends TaskQueueBase {
 		}
 
 		// Restoring to Datastore.
-		GbDatastoreService datastoreUtil = new GbDatastoreService();
-		datastoreUtil.restoreData(kind, data);
+		GbDatastoreService.restoreData(kind, data);
 
 		// Update control row.
 		control.setProperty(GbControl.COUNT, rowNum + RANGE);
