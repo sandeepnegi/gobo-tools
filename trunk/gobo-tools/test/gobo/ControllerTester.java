@@ -1,8 +1,8 @@
 package gobo;
 
-import org.slim3.tester.MockHttpServletRequest;
-import org.slim3.tester.MockHttpServletResponse;
-import org.slim3.tester.MockServletContext;
+import gobo.slim3.tester.MockHttpServletRequest;
+import gobo.slim3.tester.MockHttpServletResponse;
+import gobo.slim3.tester.MockServletContext;
 
 public class ControllerTester {
 

@@ -37,10 +37,9 @@ public class StartController extends AuthSubBase {
 		final User currentUser = user.getCurrentUser();
 
 		// Craete new spreadsheet
-		GbSpreadsheetService su = new GbSpreadsheetService(token);
-		SpreadsheetEntry createSpreadsheet = su.createSpreadsheet(Arrays.asList(kinds));
-		final String ssKey = createSpreadsheet.getKey();
-		logger.fine("ssKey=" + ssKey);
+		GbSpreadsheetService gss = new GbSpreadsheetService(token);
+		SpreadsheetEntry spreadsheet = gss.createSpreadsheet(Arrays.asList(kinds));
+		logger.fine("ssKey=" + spreadsheet.getKey());
 
 		List<Key> putKeys = null;
 		try {
@@ -58,7 +57,7 @@ public class StartController extends AuthSubBase {
 					control.setProperty(GbControl.REPORT_TO, new Email(currentUser.getEmail()));
 				}
 				control.setProperty(GbControl.AUTH_SUB_TOKEN, token);
-				control.setProperty(GbControl.SPREADSHEET_KEY, ssKey);
+				control.setProperty(GbControl.SPREADSHEET_KEY, spreadsheet.getKey());
 				control.setProperty(GbControl.UPDATE_DATE, new Date());
 				list.add(control);
 
@@ -82,6 +81,6 @@ public class StartController extends AuthSubBase {
 		}
 
 		return redirect("started.gobo?docURL="
-			+ response.encodeRedirectURL(createSpreadsheet.getHtmlLink().getHref()));
+			+ response.encodeRedirectURL(spreadsheet.getHtmlLink().getHref()));
 	}
 }
