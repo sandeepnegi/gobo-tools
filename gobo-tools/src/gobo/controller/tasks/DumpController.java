@@ -23,7 +23,7 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
 public class DumpController extends TaskQueueBase {
 
-	final Integer RANGE = 25;
+	final Integer RANGE = 5;
 
 	private static final Logger logger = Logger.getLogger(DumpController.class.getName());
 
