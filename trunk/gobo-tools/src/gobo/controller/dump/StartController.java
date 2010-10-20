@@ -3,6 +3,7 @@ package gobo.controller.dump;
 import gobo.AuthSubBase;
 import gobo.model.GbControl;
 import gobo.service.GbSpreadsheetService;
+import gobo.slim3.AppEngineUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +49,7 @@ public class StartController extends AuthSubBase {
 			List<Entity> list = new ArrayList<Entity>();
 			Queue queue = QueueFactory.getDefaultQueue();
 			List<TaskOptions> taskList = Lists.newArrayList();
+			int countDown = 10000;
 			for (int i = 0; i < kinds.length; i++) {
 				Key childKey = KeyFactory.createKey(controlId, GbControl.NAME, kinds[i]);
 				Entity control = new Entity(childKey);
@@ -62,9 +64,15 @@ public class StartController extends AuthSubBase {
 				list.add(control);
 
 				// Start task queue chain for each kind.
-				taskList.add(TaskOptions.Builder.url("/tasks/dump.gobo").param(
-					"controlKey",
-					KeyFactory.keyToString(childKey)).countdownMillis(10000).method(Method.GET));
+				taskList
+					.add(TaskOptions.Builder.url("/tasks/dump.gobo").param(
+						"controlKey",
+						KeyFactory.keyToString(childKey)).countdownMillis(countDown).method(
+						Method.GET));
+
+				if (AppEngineUtil.isProduction()) {
+					countDown += 500;
+				}
 			}
 			putKeys = datastore.put(list);
 			queue.add(taskList);
