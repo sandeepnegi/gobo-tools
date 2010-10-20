@@ -19,7 +19,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.appengine.api.datastore.Entity;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.data.docs.DocumentListEntry;
 import com.google.gdata.data.docs.DocumentListFeed;
@@ -159,8 +158,13 @@ public class GbSpreadsheetServiceTest extends TestBase {
 
 	SpreadsheetEntry createSpreadsheet(String[] kinds) {
 		goboService = new GbSpreadsheetService(authSubToken);
+		List<GbProperty> entities = TestDataUtil.entities2();
 		try {
-			return goboService.createSpreadsheet(Arrays.asList(kinds));
+			SpreadsheetEntry spreadsheet = goboService.createSpreadsheet(Arrays.asList(kinds));
+			for (String kind : kinds) {
+				goboService.prepareWorksheet(spreadsheet.getKey(), kind, entities);
+			}
+			return spreadsheet;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
