@@ -356,8 +356,8 @@ public class GbSpreadsheetService {
 	 * @param list
 	 * @throws Exception
 	 */
-	public void dumpData(String ssKey, String kind, String tableId, List<GbEntity> list)
-			throws Exception {
+	public void dumpData(String ssKey, String kind, String tableId, List<GbEntity> list,
+			boolean retry) throws Exception {
 
 		FeedURLFactory factory = FeedURLFactory.getDefault();
 		URL recordFeedUrl = factory.getRecordFeedUrl(ssKey, tableId);
@@ -376,6 +376,28 @@ public class GbSpreadsheetService {
 			}
 		}
 
+		// When retrying, Check if already exists
+		List<String> duplicateCheckList = new ArrayList<String>();
+		if (retry) {
+			/*
+			 * If you use query like setSpreadsheetQuery("__key__=Kind(1)"),
+			 * '()' in __key__ conflicts with '()' as parameter...
+			 */
+			RecordQuery query2 = new RecordQuery(recordFeedUrl);
+			query2.setMaxResults(list.size());
+			query2.setReverse(true);
+			final List<RecordEntry> entries = ss.query(query2, RecordFeed.class).getEntries();
+			for (RecordEntry entry : entries) {
+				for (Field field : entry.getFields()) {
+					if (field.getName().equals(Entity.KEY_RESERVED_PROPERTY)) {
+						duplicateCheckList.add(field.getValue());
+						break;
+					}
+				}
+			}
+			logger.info("duplicateCheckList :" + duplicateCheckList);
+		}
+
 		// Add new rows to table
 		logger.info("Start writing dump data to :" + kind);
 		List<RecordEntry> newRecordList = new ArrayList<RecordEntry>();
@@ -384,6 +406,12 @@ public class GbSpreadsheetService {
 				logger.info(gbEntity.toString());
 				RecordEntry newEntry = new RecordEntry();
 				final String key = gbEntity.getKey().toString();
+
+				if (duplicateCheckList.contains(key)) {
+					logger.info(key + " is duplicate");
+					continue;
+				}
+
 				newEntry.addField(new Field(null, Entity.KEY_RESERVED_PROPERTY, key));
 				for (GbProperty gbProperty : gbEntity.getProperties()) {
 					final String value = gbProperty.asSpreadsheetValue();

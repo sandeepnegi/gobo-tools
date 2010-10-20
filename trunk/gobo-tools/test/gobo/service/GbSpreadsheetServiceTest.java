@@ -19,6 +19,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.appengine.api.datastore.Entity;
 import com.google.gdata.client.docs.DocsService;
 import com.google.gdata.data.docs.DocumentListEntry;
 import com.google.gdata.data.docs.DocumentListFeed;
@@ -144,7 +145,7 @@ public class GbSpreadsheetServiceTest extends TestBase {
 
 			for (int i = 0; i < kinds.length; i++) {
 				List<GbEntity> entityList = TestDataUtil.entities(kinds[i]);
-				goboService.dumpData(ssKey, kinds[i], String.valueOf(i), entityList);
+				goboService.dumpData(ssKey, kinds[i], String.valueOf(i), entityList, false);
 			}
 			for (int i = 0; i < kinds.length; i++) {
 				List<GbEntity> dataOrNull = goboService.getDataOrNull(ssKey, kinds[i], 3, 10);

@@ -94,7 +94,7 @@ public class RestoreControllerTest extends TestBase {
 		Key controlKey = TaskQueueUtil.prepareDropControlKey("TestKind1");
 
 		ControllerTester tester = new ControllerTester();
-		tester.request.setHeader("X-AppEngine-TaskRetryCount", "6");
+		tester.request.setHeader("X-AppEngine-TaskRetryCount", "11");
 		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
 		String run = tester.start("/tasks/restore");
 		assertNull(run);

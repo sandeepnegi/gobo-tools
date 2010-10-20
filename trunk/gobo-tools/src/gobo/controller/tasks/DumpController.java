@@ -61,7 +61,7 @@ public class DumpController extends TaskQueueBase {
 		}
 
 		// Add to Spreadsheet.
-		gss.dumpData(ssKey, kind, tableId, list);
+		gss.dumpData(ssKey, kind, tableId, list, retry);
 
 		// Update the control table.
 		control.setProperty(GbControl.CURSOR, list.getCursor().toWebSafeString());

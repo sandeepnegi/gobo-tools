@@ -34,7 +34,7 @@ public class DumpControllerTest extends TestBase {
 	@Test
 	public void runFirstTimeTest() throws Exception {
 
-		List<Entity> bulkData = TestDataUtil.bulkData("TestKind1", 10);
+		List<Entity> bulkData = TestDataUtil.bulkData("TestKind1", 5);
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		datastore.put(bulkData);
 
@@ -114,7 +114,7 @@ public class DumpControllerTest extends TestBase {
 		Key controlKey = TaskQueueUtil.prepareDropControlKey("TestKind1");
 
 		ControllerTester tester = new ControllerTester();
-		tester.request.setHeader("X-AppEngine-TaskRetryCount", "6");
+		tester.request.setHeader("X-AppEngine-TaskRetryCount", "11");
 		tester.request.setParameter("controlKey", KeyFactory.keyToString(controlKey));
 		String run = tester.start("/tasks/dump");
 		assertNull(run);
