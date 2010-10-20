@@ -41,7 +41,7 @@ public class SpreadsheetUtil {
 				List<GbProperty> testPropList1 = TestDataUtil.entities2();
 				goboService.prepareWorksheet(createSpreadsheet.getKey(), kind, testPropList1);
 				List<GbEntity> list = TestDataUtil.entities(kind);
-				goboService.dumpData(createSpreadsheet.getKey(), kind, String.valueOf(i++), list);
+				goboService.dumpData(createSpreadsheet.getKey(), kind, String.valueOf(i++), list, false);
 			}
 			return createSpreadsheet;
 		} catch (Exception e) {

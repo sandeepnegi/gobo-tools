@@ -3,7 +3,6 @@ package gobo.controller.dump;
 import gobo.AuthSubBase;
 import gobo.model.GbControl;
 import gobo.service.GbSpreadsheetService;
-import gobo.slim3.AppEngineUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,9 +69,8 @@ public class StartController extends AuthSubBase {
 						KeyFactory.keyToString(childKey)).countdownMillis(countDown).method(
 						Method.GET));
 
-				if (AppEngineUtil.isProduction()) {
-					countDown += 500;
-				}
+				// to avoid the collision on the spreadsheet.
+				countDown += 500;
 			}
 			putKeys = datastore.put(list);
 			queue.add(taskList);

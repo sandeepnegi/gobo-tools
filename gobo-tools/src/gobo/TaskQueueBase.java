@@ -11,7 +11,8 @@ import com.google.appengine.api.datastore.Key;
 
 public abstract class TaskQueueBase extends ControllerBase {
 
-	static final int RETRY_MAX = 5;
+	static final int RETRY_MAX = 10;
+	protected boolean retry = false;
 
 	private static final Logger logger = Logger.getLogger(TaskQueueBase.class.getName());
 
@@ -20,6 +21,9 @@ public abstract class TaskQueueBase extends ControllerBase {
 
 		final String _retryCount = request.getHeader("X-AppEngine-TaskRetryCount");
 		final Integer retryCount = (_retryCount == null) ? 0 : new Integer(_retryCount);
+		if (retryCount > 0) {
+			retry = true;
+		}
 		if (retryCount > RETRY_MAX) {
 			try {
 				logger.severe("Over retry count.");

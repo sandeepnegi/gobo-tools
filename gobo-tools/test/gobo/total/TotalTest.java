@@ -29,7 +29,7 @@ public class TotalTest extends TestBase {
 	public void runTest() throws Exception {
 
 		// Preapre Data
-		final int COUNT = 100;
+		final int COUNT = 10;
 		final String KIND_NAME = "TestKind";
 		final List<Entity> orgData = TestDataUtil.bulkData(KIND_NAME, COUNT);
 		final DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
@@ -47,9 +47,11 @@ public class TotalTest extends TestBase {
 
 			// Dump Data to Spreadsheet.
 			List<GbProperty> properties = GbDatastoreService.getProperties(KIND_NAME);
-			final String tableId =
-				gss.prepareWorksheet(spreadsheet.getKey(), KIND_NAME, properties);
-			gss.dumpData(spreadsheet.getKey(), KIND_NAME, tableId, srcData);
+			final String tableId = gss.prepareWorksheet(spreadsheet.getKey(), KIND_NAME, properties);
+			gss.dumpData(spreadsheet.getKey(), KIND_NAME, tableId, srcData, false);
+
+			// (Retry) Dump Data to Spreadsheet.
+			gss.dumpData(spreadsheet.getKey(), KIND_NAME, tableId, srcData, true);
 
 			// Get Data from Spreadsheet
 			final List<GbEntity> midData =
