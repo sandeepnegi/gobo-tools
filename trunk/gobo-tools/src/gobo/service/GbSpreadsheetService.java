@@ -97,17 +97,15 @@ public class GbSpreadsheetService {
 			ServiceException {
 
 		FeedURLFactory urlFactory = FeedURLFactory.getDefault();
-		WorksheetQuery worksheetQuery =
-			new WorksheetQuery(urlFactory.getWorksheetFeedUrl(ssKey, "private", "values"));
-		WorksheetFeed worksheetFeed = ss.query(worksheetQuery, WorksheetFeed.class);
-		List<WorksheetEntry> entries = worksheetFeed.getEntries();
+		URL tableFeedUrl = urlFactory.getTableFeedUrl(ssKey);
+		TableFeed feed = ss.getFeed(tableFeedUrl, TableFeed.class);
+		List<TableEntry> entries = feed.getEntries();
 
 		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-		for (WorksheetEntry workSheet : entries) {
+		for (TableEntry entry : entries) {
 			Map<String, String> row = new HashMap<String, String>();
-			// row.put("wsID", workSheet.getId());
-			row.put("wsTitle", workSheet.getTitle().getPlainText());
-			row.put("rowCount", String.valueOf(workSheet.getRowCount() - 3));
+			row.put("wsTitle", entry.getTitle().getPlainText());
+			row.put("rowCount", String.valueOf(entry.getData().getNumberOfRows() - 1));
 			list.add(row);
 		}
 		return list;
