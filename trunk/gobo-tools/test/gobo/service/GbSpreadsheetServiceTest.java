@@ -191,4 +191,63 @@ public class GbSpreadsheetServiceTest extends TestBase {
 		}
 	}
 
+	@Test
+	public void number2columnNameTest() {
+
+		GbSpreadsheetService gss = new GbSpreadsheetService(authSubToken);
+		assertThat(gss.number2columnName(0), is("A"));
+		assertThat(gss.number2columnName(1), is("B"));
+		assertThat(gss.number2columnName(2), is("C"));
+		assertThat(gss.number2columnName(3), is("D"));
+		assertThat(gss.number2columnName(4), is("E"));
+		assertThat(gss.number2columnName(5), is("F"));
+		assertThat(gss.number2columnName(6), is("G"));
+		assertThat(gss.number2columnName(7), is("H"));
+		assertThat(gss.number2columnName(8), is("I"));
+		assertThat(gss.number2columnName(9), is("J"));
+		assertThat(gss.number2columnName(10), is("K"));
+		assertThat(gss.number2columnName(11), is("L"));
+		assertThat(gss.number2columnName(12), is("M"));
+		assertThat(gss.number2columnName(13), is("N"));
+		assertThat(gss.number2columnName(14), is("O"));
+		assertThat(gss.number2columnName(15), is("P"));
+		assertThat(gss.number2columnName(16), is("Q"));
+		assertThat(gss.number2columnName(17), is("R"));
+		assertThat(gss.number2columnName(18), is("S"));
+		assertThat(gss.number2columnName(19), is("T"));
+		assertThat(gss.number2columnName(20), is("U"));
+		assertThat(gss.number2columnName(21), is("V"));
+		assertThat(gss.number2columnName(22), is("W"));
+		assertThat(gss.number2columnName(23), is("X"));
+		assertThat(gss.number2columnName(24), is("Y"));
+		assertThat(gss.number2columnName(25), is("Z"));
+		assertThat(gss.number2columnName(26), is("AA"));
+		assertThat(gss.number2columnName(27), is("AB"));
+		assertThat(gss.number2columnName(28), is("AC"));
+		assertThat(gss.number2columnName(29), is("AD"));
+		assertThat(gss.number2columnName(30), is("AE"));
+		assertThat(gss.number2columnName(31), is("AF"));
+		assertThat(gss.number2columnName(32), is("AG"));
+		assertThat(gss.number2columnName(33), is("AH"));
+		assertThat(gss.number2columnName(34), is("AI"));
+		assertThat(gss.number2columnName(35), is("AJ"));
+		assertThat(gss.number2columnName(36), is("AK"));
+		assertThat(gss.number2columnName(37), is("AL"));
+		assertThat(gss.number2columnName(38), is("AM"));
+		assertThat(gss.number2columnName(39), is("AN"));
+		assertThat(gss.number2columnName(40), is("AO"));
+		assertThat(gss.number2columnName(41), is("AP"));
+		assertThat(gss.number2columnName(42), is("AQ"));
+		assertThat(gss.number2columnName(43), is("AR"));
+		assertThat(gss.number2columnName(44), is("AS"));
+		assertThat(gss.number2columnName(45), is("AT"));
+		assertThat(gss.number2columnName(46), is("AU"));
+		assertThat(gss.number2columnName(47), is("AV"));
+		assertThat(gss.number2columnName(48), is("AW"));
+		assertThat(gss.number2columnName(49), is("AX"));
+		assertThat(gss.number2columnName(50), is("AY"));
+		assertThat(gss.number2columnName(51), is("AZ"));
+		assertThat(gss.number2columnName(52), is("BA"));
+	}
+
 }
