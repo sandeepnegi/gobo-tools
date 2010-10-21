@@ -491,7 +491,7 @@ public class GbSpreadsheetService {
 				"Z" };
 		int devided = i / 26;
 		int amari = i % 26;
-		String name = (devided == 0) ? alpha[amari] : alpha[devided] + alpha[amari];
+		String name = (devided == 0) ? alpha[amari] : alpha[devided - 1] + alpha[amari];
 		return name;
 	}
 }
