@@ -53,4 +53,5 @@ Add the expressions below to web.xml
 }}}
 
 *That's all*
-Now, You can use tools at http(s)://your-app-id.appspot.com/index.gobo
+
+Now, You can use tools at http(s)://your-app-id.appspot.com/index.gobo *(The extension is "gobo")*
