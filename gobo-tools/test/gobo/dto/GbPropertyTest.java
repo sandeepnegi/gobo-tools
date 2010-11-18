@@ -348,7 +348,8 @@ public class GbPropertyTest extends TestBase {
 		prop2.asDatastoreValue();
 	}
 	
-	@Test(expected = RuntimeException.class)
+	//@Test(expected = RuntimeException.class)
+	@Test
 	public void testText() {
 
 		GbProperty prop = new GbProperty();
@@ -363,9 +364,9 @@ public class GbPropertyTest extends TestBase {
 		GbProperty prop2 = new GbProperty();
 		prop2.setValue(asSpreadsheetValue);
 		prop2.setValueType(asSpreadsheetValueType);
-//		final Object asDatastoreValue = prop2.asDatastoreValue();
-//		assertThat(asDatastoreValue, equalTo(org));
-		prop2.asDatastoreValue();
+		final Object asDatastoreValue = prop2.asDatastoreValue();
+		assertThat(asDatastoreValue, equalTo(org));
+		//prop2.asDatastoreValue();
 	}
 	
 	@Test

@@ -420,7 +420,7 @@ public class GbSpreadsheetService {
 					if (valueTypeRowMap.containsKey(columnName) == false) {
 						continue; // when the colum name is undefined.
 					}
-					newEntry.addField(new Field(null, columnName, value));
+					newEntry.addField(new Field(null, columnName, "'" + value));
 
 					// Update valueType Cell
 					if (valueTypeNotSet) {

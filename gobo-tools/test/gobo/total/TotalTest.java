@@ -74,7 +74,7 @@ public class TotalTest extends TestBase {
 									if (destProp.getValueType().equals(GbProperty.SHORT_BLOB)) {
 										assertThat(
 											destProp.getValue().toString(),
-											is(GbProperty.NOT_SUPPORTED));
+											is("'" + GbProperty.NOT_SUPPORTED));
 									} else {
 										assertThat(destProp.asDatastoreValue(), equalTo(srcProp
 											.getValue()));
