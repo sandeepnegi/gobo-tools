@@ -1,0 +1,20 @@
+#summary One-sentence summary of this page.
+
+= Step 1 =
+
+Download the latest version of zip file from http://code.google.com/p/gobo-tools/downloads/list.
+
+You can see files below in zip.
+
+ * gobo-tools.xxxxxxxx.jar
+ * gdata-media-1.0.jar
+ * gdata-docs-3.0.jar
+ * google-collect-1.0-rc1.jar
+ * gdata-spreadsheet-meta-3.0.jar
+ * gdata-spreadsheet-3.0.jar
+ * gdata-core-1.0.jar
+ * gdata-client-meta-1.0.jar
+ * gdata-client-1.0.jar
+ * gobo（Folder）
+
+= Step 2 =
