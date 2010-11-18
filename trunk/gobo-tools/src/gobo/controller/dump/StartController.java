@@ -4,6 +4,7 @@ import gobo.AuthSubBase;
 import gobo.model.GbControl;
 import gobo.service.GbSpreadsheetService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -38,7 +39,15 @@ public class StartController extends AuthSubBase {
 
 		// Craete new spreadsheet
 		GbSpreadsheetService gss = new GbSpreadsheetService(token);
-		SpreadsheetEntry spreadsheet = gss.createSpreadsheet(Arrays.asList(kinds));
+		SpreadsheetEntry spreadsheet;
+		while (true) {
+			try {
+				spreadsheet = gss.createSpreadsheet(Arrays.asList(kinds));
+				break;
+			} catch (IOException ioe) {
+				// retry when timeout.
+			}
+		}
 		logger.fine("ssKey=" + spreadsheet.getKey());
 
 		List<Key> putKeys = null;

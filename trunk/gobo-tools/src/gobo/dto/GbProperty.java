@@ -161,8 +161,8 @@ public class GbProperty {
 			// return null;
 			return NOT_SUPPORTED;
 		} else if (value instanceof Text) {
-			// val = ((Text) value).getValue();
-			return NOT_SUPPORTED;
+			val = ((Text) value).getValue();
+			// return NOT_SUPPORTED;
 		} else if (value instanceof Date) {
 			val = String.valueOf(((Date) value).getTime());
 		} else if (value instanceof Link) {
@@ -192,7 +192,7 @@ public class GbProperty {
 		} else {
 			val = value.toString();
 		}
-		return "\"" + val + "\"";
+		return val;
 	}
 
 	/**
@@ -223,6 +223,8 @@ public class GbProperty {
 		final String _tmp = (String) value;
 		if ((_tmp.startsWith("\"")) && (_tmp.endsWith("\""))) {
 			value = _tmp.subSequence(1, _tmp.length() - 1);
+		} else if (_tmp.startsWith("'")) {
+			value = _tmp.subSequence(1, _tmp.length());
 		}
 		if ((valueType == null) || (valueType.length() == 0)) {
 			val = value;
@@ -242,8 +244,8 @@ public class GbProperty {
 		} else if (valueType.equals(BLOB)) {
 			throw new RuntimeException("Blob is not supported.");
 		} else if (valueType.equals(TEXT)) {
-			// val = new Text((String) value);
-			throw new RuntimeException("Text is not supported.");
+			val = new Text((String) value);
+			// throw new RuntimeException("Text is not supported.");
 		} else if (valueType.equals(DATE)) {
 			val = new Date(Long.parseLong((String) value));
 		} else if (valueType.equals(LINK)) {
