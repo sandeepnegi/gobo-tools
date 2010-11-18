@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary Here is how to install gobo-tools in your app.
 
 = Step 1 =
 
@@ -18,3 +18,39 @@ You can see files below in zip.
  * gobo（Folder）
 
 = Step 2 =
+
+Copy all jar files under war/WEB-INF/lib
+
+Copy the gobo folder under war
+
+= Step 3 =
+
+Add the expressions below to web.xml
+
+{{{
+    <servlet>
+        <servlet-name>GoboServlet</servlet-name>
+        <servlet-class>gobo.GoboServlet</servlet-class>
+    </servlet>
+}}}
+
+{{{
+    <servlet-mapping>
+        <servlet-name>GoboServlet</servlet-name>
+        <url-pattern>*.gobo</url-pattern>
+    </servlet-mapping>
+}}}
+
+{{{
+    <security-constraint>
+        <web-resource-collection>
+            <url-pattern>*.gobo</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+}}}
+
+*That's all*
+Now, You can use tools at http(s)://your-app-id.appspot.com/index.gobo
